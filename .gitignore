@@ -50,6 +50,8 @@ temp/
 *.xdy
 *.xlg
 *.todos
+## test results
+*.tlg
 ## include test files
 !test/**/*.tex
 !test/**/*.cls

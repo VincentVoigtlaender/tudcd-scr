@@ -41,10 +41,15 @@
 %   nicht zu Übersetzungsabrüchen führt.
 % \end{description}
 %
+% Beim Entpacken werden die Testdokumente innerhalb einer \dcode{\textbackslash ifx}-Abfrage übersprungen.
+% Damit die darin genutzten Schalter von \LaTeX{} korrekt verschachtelt werden, müssen sie beim Entpacken
+% als Bedingungen bekannt sein.
 %    \begin{macrocode}
 %<*ins>
 \input docstrip.tex
 \def\tudcdbatchfilemode{\relax}
+\let\if@altsecnumformat\iffalse
+\let\if@openright\iffalse
 %</ins>
 %<*ins>
 \ifx\tudcdbatchfilemode\undefined%
@@ -89,6 +94,8 @@
   \testsuitelateforclass{report}
   \testsuiteglobalforclass{book}
   \testsuitelateforclass{book}
+  \testsuiteglobalforclass{thesis}
+  \testsuitelateforclass{thesis}
   \testsuiteglobalforclass{letter}
   \testsuitelateforclass{letter}
   \testsuitelateforclass{beamer}
@@ -109,6 +116,7 @@
 %<article>tudcdartcl%%
 %<report>tudcdreprt%%
 %<book>tudcdbook%%
+%<thesis>tudcdthesis%%
 %<beamer>beamer%%
 %<letter>tudcdlttr%%
 }
@@ -163,6 +171,7 @@
   \testsuitekomaforclass{article}
   \testsuitekomaforclass{report}
   \testsuitekomaforclass{book}
+  \testsuitekomaforclass{thesis}
 }
 \endgroup
 %</ins>
@@ -180,9 +189,11 @@
 %<article&test>tudcdartcl%%
 %<report&test>tudcdreprt%%
 %<book&test>tudcdbook%%
+%<thesis&test>tudcdthesis%%
 %<article&!test>scrartcl%%
 %<report&!test>scrreprt%%
 %<book&!test>scrbook%%
+%<thesis&!test>scrbook%%
 }
 
 \begin{document}
@@ -196,6 +207,88 @@
 \END
 \end{document}
 %</0002>
+%<*ins>
+\fi
+%</ins>
+%    \end{macrocode}
+%
+% \end{unittest}
+% \subsubsection{Testen des Ausgabemediums}
+%
+% \begin{unittest}{dev-version}{Voreinstellungen der Option \texttt{output} der Klasse für Abschlussarbeiten}
+%
+% Die Option \doption{output} setzt Voreinstellungen für \KOMAScript{} sowie die Farben.
+% Explizit gesetzte Optionen müssen dabei Vorrang haben.
+% Ausgegeben werden die doppelseitige Einstellung, \doption{open}, die Bindekorrektur in Millimetern,
+% die Hervorhebungsfarbe und die Farbe des Logos.
+%    \begin{macrocode}
+%<*ins>
+\begingroup
+\def\testsuiteoutput#1{
+  \file{\jobname-0003-output-#1.lvt}{\from{\jobname.dtx}{0003,preamble,#1,test}}
+  \file{\jobname-0003-output-#1.lve}{\from{\jobname.dtx}{0003,preamble,#1}}
+}
+\generate{
+  \testsuiteoutput{digital}
+  \testsuiteoutput{print}
+  \testsuiteoutput{printoneside}
+  \testsuiteoutput{printbcor}
+  \testsuiteoutput{digitaltwoside}
+  \testsuiteoutput{printcolor}
+}
+\endgroup
+%</ins>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*ins>
+\ifx\tudcdbatchfilemode\undefined%
+%</ins>
+%<*0003>
+%<@@=tudcd>
+\documentclass
+%<digital>[output=digital]
+%<print>[output=print]
+%<printoneside>[output=print,oneside]
+%<printbcor>[output=print,BCOR=5mm]
+%<digitaltwoside>[twoside]
+%<printcolor>[output=print,color/highlight-color=Rot1,logo/color=blue]
+%<test>{tudcdthesis}
+%<!test>{article}
+
+\begin{document}
+\START
+%<*test>
+\makeatletter
+\ExplSyntaxOn
+\typeout{twoside=\legacy_if:nTF{@twoside}{true}{false}}
+\typeout{openright=\legacy_if:nTF{@openright}{true}{false}}
+\typeout{BCOR=\fp_eval:n{round(\dim_to_decimal_in_unit:nn{\ta@bcor}{1mm},1)}}
+\typeout{color=\tl_use:N\l_@@_highlight_color_tl}
+\typeout{logo=\str_use:N\l_@@_logocolor_str}
+\ExplSyntaxOff
+\makeatother
+%</test>
+%<*!test>
+%<digital|digitaltwoside>\typeout{twoside=%
+%<digital>false}
+%<digitaltwoside>true}
+%<print|printbcor|printcolor>\typeout{twoside=true}
+%<printoneside>\typeout{twoside=false}
+\typeout{openright=true}
+%<digital|digitaltwoside|printoneside|print|printcolor>\typeout{BCOR=%
+%<digital|digitaltwoside>0}
+%<print|printoneside|printcolor>10}
+%<printbcor>\typeout{BCOR=5}
+%<digital|digitaltwoside>\typeout{color=Brilliantblau}
+%<print|printoneside|printbcor>\typeout{color=Schwarz}
+%<printcolor>\typeout{color=Rot1}
+%<digital|digitaltwoside|printcolor>\typeout{logo=blue}
+%<print|printoneside|printbcor>\typeout{logo=black}
+%</!test>
+\END
+\end{document}
+%</0003>
 %<*ins>
 \fi
 %</ins>
