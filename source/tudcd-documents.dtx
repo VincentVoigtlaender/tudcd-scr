@@ -112,9 +112,14 @@
 % wieder zusammengesetzt.
 % Wurde die Option ohne Wert angegeben (bspw.\@ \doption{fleqn}), so enthält \dcode{\#1} den Marker
 % \dmacro{\c_novalue_tl} und es wird nur der Name des Schlüssels weitergereicht.
+%
+% Die Klasse \dcode{tudcdthesis} merkt sich zusätzlich die Namen aller weitergereichten Schlüssel
+% in \dmacro{\g_@@_thesis_user_koma_clist}, damit Voreinstellungen der Option \doption{output}
+% explizit gesetzte \KOMAScript-Optionen nicht überschreiben.
 %    \begin{macrocode}
 %<*option&peri>
   unknown .code:n = {
+%<thesis>    \clist_gput_right:NV \g_@@_thesis_user_koma_clist \l_keys_key_str
     \tl_if_novalue:nTF {#1}
       {
         \PassOptionsToClass{\l_keys_key_str}

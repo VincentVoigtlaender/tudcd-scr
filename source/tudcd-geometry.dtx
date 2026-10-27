@@ -185,7 +185,7 @@
   }{
     \str_set_eq:NN \l_@@_geometry_paper_size_str \l_keys_choice_tl
   },
-%<*article|report|book|thesis>
+%<*article|report|book>
   usemargin .bool_set:N = \l_@@_geometry_margin_bool,
   usemargin .default:n = { true },
   usemargin .initial:n = { false },
@@ -193,7 +193,7 @@
   oneside .value_forbidden:n = { true },
   twoside .code:n = { \bool_set_true:N\l_@@_geometry_twoside_bool },
   twoside .value_forbidden:n = { true },
-%</article|report|book|thesis>
+%</article|report|book>
 %</option-geometry&peri>
 %    \end{macrocode}
 %

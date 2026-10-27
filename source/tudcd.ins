@@ -171,6 +171,41 @@ LaTeX version 2025-05-04 or later.
   }
 }
 \generate{%
+  \file{tudcdthesis.cls}{
+    \from{tudcd-common.dtx}{identification,class,pre}
+    \from{tudcd-documents.dtx}{identification,thesis}
+    \from{tudcd-common.dtx}{identification,class,post}
+    \from{tudcd-common.dtx}{prelim-declaration,class}
+    \from{tudcd-colors.dtx}{prelim-declaration,thesis}
+    \from{tudcd-thesis.dtx}{prelim-declaration,thesis}
+    %% Optionen!
+    \from{tudcd-common.dtx}{option,pre,class}
+    \from{tudcd-common.dtx}{option,peri,class}
+    \from{tudcd-colors.dtx}{option,peri,thesis}
+    \from{tudcd-documents.dtx}{option,peri,thesis}
+    \from{tudcd-thesis.dtx}{option,peri,thesis}
+    \from{tudcd-common.dtx}{option,post,class}
+    %% ProcessKeyOptions
+    \from{tudcd-common.dtx}{optionloading,pre,class}
+    \from{tudcd-thesis.dtx}{optionloading,pre,thesis}
+    \from{tudcd-common.dtx}{optionloading,peri,class}
+    \from{tudcd-common.dtx}{optionloading,post,class}
+    \from{tudcd-thesis.dtx}{optionloading,post,thesis}
+    %% Header
+    \from{tudcd-common.dtx}{header,peri,class}
+    \from{tudcd-colors.dtx}{header,peri,thesis}
+    %% \LoadClass
+    \from{tudcd-common.dtx}{baseclassloading,pre,class}
+    \from{tudcd-documents.dtx}{baseclassloading,peri,thesis}
+    \from{tudcd-common.dtx}{baseclassloading,post,class}
+    %% Body
+    \from{tudcd-common.dtx}{body,pre,class}
+    \from{tudcd-thesis.dtx}{body,peri,thesis}
+    \from{tudcd-documents.dtx}{body,peri,thesis}%
+    \from{tudcd-common.dtx}{body,post,class}%
+  }
+}
+\generate{%
   \file{tudcdcolor.sty}{
     \from{tudcd-common.dtx}{identification,package,pre}%
     \from{tudcd-colors.dtx}{identification,package}%

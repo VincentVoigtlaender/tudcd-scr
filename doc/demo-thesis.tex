@@ -1,0 +1,81 @@
+% Demonstration der Klasse tudcdthesis
+%
+% Für den Druck die Option output=print setzen. Dies aktiviert den doppelseitigen
+% Satz mit Bindekorrektur und setzt alle farbigen Elemente schwarz.
+\documentclass[
+  output=digital,
+  abstract={section,multiple,totoc},
+  declaration={chapter,totoc},
+]{tudcdthesis}
+\usepackage[english,ngerman]{babel}
+\usepackage[babel]{microtype}
+\usepackage{amsmath}
+\usepackage{csquotes}
+\usepackage{blindtext}
+\usepackage{hyperref}
+
+% Organisationseinheiten
+\faculty{Fakultät Kaffeemaschinenbau}
+\institute{Institut für Typographie}
+\chair{Professur für Angewandte Kompilierfehler}
+
+% Angaben zur Arbeit
+\thesis{diploma}
+\graduation[Dipl.-Ing.]{Diplomingenieur}
+\title{Über das ordentliche Setzen einer Abschlussarbeit}
+\subtitle{im Corporate Design der TU~Dresden}
+\author{Hans Wirdingenieur}
+\matriculationnumber{1234567}
+\dateofbirth{20.02.2002}
+\placeofbirth{Dresden}
+\course{Technische Textsatzkunde}
+\discipline{Angewandte Gleitkommaverschiebung}
+\supervisor{Dr.-Ing. Frieda Fließtext \and Dipl.-Ing. Moritz Marginpar}
+\professor{Prof. Dr.-Ing. Berta Blocksatz}
+\date{29. Februar 2026}
+
+\begin{document}
+\frontmatter
+\maketitle
+
+\begin{abstract}
+  \blindtext
+  \nextabstract[english]
+  \blindtext
+\end{abstract}
+
+\begin{declarations}
+  \confirmation
+  \blocking[company=Heimlich GmbH]
+\end{declarations}
+
+\tableofcontents
+
+\mainmatter
+\chapter{Einleitung}
+\blindtext
+
+\section{Motivation}
+\blindtext[2]
+
+\subsection{Ein Unterabschnitt}
+\blindtext
+
+\paragraph{Ein Absatz}
+\blindtext
+
+\chapter{Grundlagen}
+\section{Eine Gleichung}
+Aus der Bewegungsgleichung~\eqref{eq:bewegung} folgt nach Abschnitt~\ref{sec:schluss}
+das Ergebnis.
+\begin{equation}
+  m\ddot{x} + d\dot{x} + kx = F(t)
+  \label{eq:bewegung}
+\end{equation}
+\blindtext
+
+\section{Zusammenfassung}
+\label{sec:schluss}
+\blindtext
+
+\end{document}

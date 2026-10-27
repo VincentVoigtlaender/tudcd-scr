@@ -1,0 +1,1727 @@
+% \iffalse meta-comment
+% LTeX: language=de-DE
+%
+%  TUDCD-Script -- Corporate Design of Technische Universität Dresden
+% ----------------------------------------------------------------------------
+%
+%  Copyright (C) TU Dresden <tudlatex@tu-dresden.de>, 2026
+%
+% ----------------------------------------------------------------------------
+%
+%  This work may be distributed and/or modified under the conditions of the
+%  LaTeX Project Public License, either version 1.3c of this license or
+%  any later version. The latest version of this license is in
+%    http://www.latex-project.org/lppl.txt
+%  and version 1.3c or later is part of all distributions of
+%  LaTeX version 2008-05-04 or later.
+%
+%  This work has the LPPL maintenance status "maintained".
+%
+%  The current maintainer and author of this work is Yoshi Diepelt.
+%
+% ----------------------------------------------------------------------------
+% \fi
+%
+% \iffalse ins:batch + dtx:driver
+%<*ins>
+\ifx\documentclass\undefined
+  \input docstrip.tex
+  \ifToplevel{\batchinput{tudcd.ins}}
+\else
+  \let\endbatchfile\relax
+\fi
+\endbatchfile
+%</ins>
+%<*dtx>
+\ProvidesFile{tudcd-thesis.dtx}[2026/10/27]
+\documentclass[english,ngerman]{tudcddoc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+
+\usepackage{babel}
+\usepackage[babel]{microtype}
+\RecordChanges
+\begin{document} % Diese Dokumentation dokumentiert NUR diese Datei
+  \title{\Large Dokumentation der Datei \texttt{\jobname.dtx} \\
+  \normalsize Generiert durch \texttt{\$ enginetex \jobname.dtx}}
+  \author{Vincent Voigtländer}
+  \maketitle
+  \tableofcontents
+
+  \DocInput{tudcd-thesis.dtx}
+\end{document}
+%</dtx>
+% \fi
+% \selectlanguage{ngerman}
+%
+% \section{\texttt{tudcd-thesis}: Die Klasse für Abschlussarbeiten}
+%
+% \subsection{Vorbemerkung}
+%
+% Die Klasse \dcode{tudcdthesis} ist eine schlanke Hülle um die \KOMAScript-Klasse \dcode{scrbook}.
+% Sie ersetzt die Klasse \dcode{tudscrreprt} aus dem \dpkg{tudscr}-Bündel und übernimmt
+% deren inhaltliche Schnittstelle (Eingabefelder, Titelseite, Zusammenfassung und Erklärungen),
+% nicht jedoch deren Layoutoptionen.
+%
+% Im Gegensatz zu den übrigen Klassen des \TUDCDScript{} werden
+% \begin{itemize}
+%   \item der Satzspiegel durch \dpkg{typearea} bestimmt (\doption{BCOR} und \doption{DIV} sind erlaubt),
+%   \item der Fließtext in Computer Modern (Latin Modern) gesetzt und lediglich die Auszeichnungsschriften
+%         (Überschriften, Titel, Kolumnentitel) in Noto Sans, sowie
+%   \item die Seitenstile von \dpkg{scrlayer-scrpage} ohne Logo verwendet.
+% \end{itemize}
+%
+% Aus den gemeinsamen Modulen werden lediglich \texttt{tudcd-common} (Optionen, Logo),
+% \texttt{tudcd-documents} (Identifikation, Basisklasse) und \texttt{tudcd-colors} (Farben) genutzt.
+%
+%    \begin{macrocode}
+%<@@=tudcd>
+%    \end{macrocode}
+%
+% \subsection{Optionen}
+%
+% \subsubsection{Ausgabemedium}
+%
+% \begin{codedescribe}[option,new=0.8.0]{output}
+% \begin{codesyntax}
+% \tsobj[key]{output}=\tsobj[value]{digital,print}
+% \end{codesyntax}
+% Die globale Option \doption{output} legt fest, ob die Arbeit für die Ansicht am Bildschirm
+% (\dcode{digital}, Voreinstellung) oder für den Druck (\dcode{print}) gesetzt wird.
+%
+% Für \dcode{digital} wird einseitig (\doption{oneside}) gesetzt und alle Elemente des Corporate Designs
+% erscheinen in Brilliantblau.
+%
+% Für \dcode{print} werden die \KOMAScript-Optionen \doption{twoside}, \doption{open}\dcode{=right},
+% \doption{cleardoublepage}\dcode{=empty} und \doption{BCOR}\dcode{=10mm} voreingestellt.
+% Zudem werden Überschriften, Titel, Kolumnentitel, Verweise und das Logo schwarz gesetzt,
+% um farbige Druckseiten zu vermeiden.
+%
+% Die Voreinstellungen werden nur dann gesetzt, wenn die jeweilige Option nicht explizit
+% in \dmacro{\documentclass} angegeben worden ist.
+% \end{codedescribe}
+%
+% Die Wahl wird in einer Zeichenkette gespeichert.
+% Weiterhin wird eine Liste der durch Nutzende explizit gesetzten \KOMAScript-Optionen benötigt,
+% welche in \texttt{tudcd-documents} befüllt wird.
+%    \begin{macrocode}
+%<*prelim-declaration>
+\str_new:N \l_@@_thesis_output_str
+\clist_new:N \g_@@_thesis_user_koma_clist
+\bool_new:N \l_@@_thesis_bodyfont_noto_bool
+%</prelim-declaration>
+%    \end{macrocode}
+%
+% Wird \dcode{print} gewählt, werden die Hervorhebungsfarbe und die Farbe des Logos auf Schwarz gesetzt.
+% Werden \doption{color/highlight-color} oder \doption{logo/color} später gesetzt, so überschreiben diese die Voreinstellung.
+%    \begin{macrocode}
+%<*option&peri>
+  output .choices:nn = { digital, print }
+    {
+      \str_set:NV \l_@@_thesis_output_str \l_keys_choice_tl
+      \str_if_eq:VnT \l_keys_choice_tl { print }
+        {
+          \tl_set:Nn \l_@@_highlight_color_tl { Schwarz }
+          \str_set:Nn \l_@@_logocolor_str { black }
+        }
+    },
+  output .initial:n = digital,
+  output .usage:n = load,
+%</option&peri>
+%    \end{macrocode}
+%
+% \subsubsection{Schrift des Fließtextes}
+%
+% \begin{codedescribe}[option,new=0.8.0]{bodyfont}
+% \begin{codesyntax}
+% \tsobj[key]{bodyfont}=\tsobj[value]{cm,noto}
+% \end{codesyntax}
+% Der Fließtext wird per Voreinstellung (\dcode{cm}) in Computer Modern gesetzt, da diese Schrift
+% für lange Texte gut lesbar ist. Mit \dcode{noto} wird auch der Fließtext in Noto Sans gesetzt.
+% Der Mathematiksatz bleibt in beiden Fällen unverändert.
+% \end{codedescribe}
+%    \begin{macrocode}
+%<*option&peri>
+  bodyfont .choices:nn = { cm, noto }
+    {
+      \str_if_eq:VnTF \l_keys_choice_tl { noto }
+        { \bool_set_true:N \l_@@_thesis_bodyfont_noto_bool }
+        { \bool_set_false:N \l_@@_thesis_bodyfont_noto_bool }
+    },
+  bodyfont .initial:n = cm,
+  bodyfont .usage:n = preamble,
+%</option&peri>
+%    \end{macrocode}
+%
+% \subsubsection{Zusammenfassung und Erklärungen}
+%
+% \begin{codedescribe}[option,new=0.8.0]{abstract,declaration}
+% \begin{codesyntax}
+% \tsobj[key]{abstract}=\tsobj[value]{Werteliste}
+%
+% \tsobj[key]{declaration}=\tsobj[value]{Werteliste}
+% \end{codesyntax}
+% Die beiden Optionen steuern das Aussehen der Umgebungen \denv{abstract} und \denv{declarations}.
+% Sie verstehen dieselben Werte wie die gleichnamigen Optionen von \dpkg{tudscr}, inklusive aller Synonyme:
+% \begin{description}
+%   \item[\dcode{false}] keine Überschrift,
+%   \item[\dcode{true}] zentrierte Überschrift (Voreinstellung),
+%   \item[\dcode{section}] Überschrift mit \dmacro{\section*},
+%   \item[\dcode{chapter}] Überschrift mit \dmacro{\chapter*},
+%   \item[\dcode{single}, \dcode{multiple}] jeder Teil auf eigener Seite oder alle Teile gemeinsam,
+%   \item[\dcode{fil}, \dcode{nofil}] vertikale Zentrierung auf der Seite,
+%   \item[\dcode{markboth}, \dcode{nomarkboth}] Setzen der Kolumnentitel,
+%   \item[\dcode{nottotoc}, \dcode{totoc}, \dcode{totocleveldown}, \dcode{tocmultiple}] Einträge im Inhaltsverzeichnis.
+% \end{description}
+% \end{codedescribe}
+%
+% Für beide Optionen wird ein gemeinsamer Zustand angelegt.
+%    \begin{macrocode}
+%<*prelim-declaration>
+\clist_map_inline:nn { abstract, declaration }
+  {
+    \int_new:c { l_@@_thesis_#1_level_int }
+    \int_new:c { l_@@_thesis_#1_toc_int }
+    \bool_new:c { l_@@_thesis_#1_toc_locked_bool }
+    \bool_new:c { l_@@_thesis_#1_multi_bool }
+    \bool_new:c { l_@@_thesis_#1_fil_bool }
+    \bool_new:c { l_@@_thesis_#1_markboth_bool }
+    \int_set:cn { l_@@_thesis_#1_level_int } { 1 }
+    \bool_set_true:c { l_@@_thesis_#1_multi_bool }
+    \bool_set_true:c { l_@@_thesis_#1_fil_bool }
+  }
+%    \end{macrocode}
+% Die Synonyme der Werte werden auf einen kanonischen Wert abgebildet.
+%    \begin{macrocode}
+\prop_new:N \g_@@_thesis_fm_alias_prop
+\cs_generate_variant:Nn \prop_get:NnNTF { Ne }
+\cs_set_protected:Npn \@@_thesis_tmp:nn #1#2
+  {
+    \clist_map_inline:nn {#2}
+      { \prop_gput:Nnn \g_@@_thesis_fm_alias_prop {##1} {#1} }
+  }
+\@@_thesis_tmp:nn { false } { false, off, no }
+\@@_thesis_tmp:nn { true } { true, on, yes }
+\@@_thesis_tmp:nn { section } { section, sect, sec, addsec }
+\@@_thesis_tmp:nn { chapter } { chapter, chap, addchap, heading, new, standard }
+\@@_thesis_tmp:nn { single } { single, one, simple }
+\@@_thesis_tmp:nn { multiple } { multiple, multi, all, aggregate, two, both, double }
+\@@_thesis_tmp:nn { nofil } { nofil, nofill, novfil, novfill }
+\@@_thesis_tmp:nn { fil } { fil, fill, vfil, vfill }
+\@@_thesis_tmp:nn { markboth } { markboth, mark }
+\@@_thesis_tmp:nn { nomarkboth } { nomarkboth, nomark }
+\@@_thesis_tmp:nn { nottotoc } { nottotoc, notoc }
+\@@_thesis_tmp:nn { totoc } { totoc, toc, totoclevelup, toclevelup, levelup }
+\@@_thesis_tmp:nn { totocleveldown } { totocleveldown, tocleveldown, leveldown }
+\@@_thesis_tmp:nn { tocmultiple }
+  {
+    tocmultiple, tocmulti, tocall, tocaggregate,
+    totocmultiple, totocmulti, totocall, totocaggregate
+  }
+%    \end{macrocode}
+% Die Ebene der Überschrift gibt den Eintrag ins Inhaltsverzeichnis vor, sofern dieser nicht explizit gesetzt worden ist.
+% Die Zahlenwerte entsprechen denen von \dpkg{tudscr}: Ebene $0$ bis $3$ für \dcode{false} bis \dcode{chapter},
+% Inhaltsverzeichnis $0$ (kein Eintrag), $1$ (oberste Ebene), $2$ (eine Ebene tiefer) sowie $3$ und $4$ für
+% einen gemeinsamen Eintrag aller Teile.
+%    \begin{macrocode}
+\msg_new:nnnn { tudcd } { thesis/fm-value }
+  { Unknown~value~'#2'~for~option~'#1'. }
+  { See~the~tudcdscr~handbook~for~the~values~of~the~'#1'~option. }
+\cs_new_protected:Npn \@@_thesis_fm_toc_preset:nn #1#2
+  {
+    \bool_if:cF { l_@@_thesis_#1_toc_locked_bool }
+      { \int_set:cn { l_@@_thesis_#1_toc_int } {#2} }
+  }
+\cs_new_protected:Npn \@@_thesis_fm_toc_set:nn #1#2
+  {
+    \int_set:cn { l_@@_thesis_#1_toc_int } {#2}
+    \bool_set_true:c { l_@@_thesis_#1_toc_locked_bool }
+  }
+\cs_new_protected:Npn \@@_thesis_fm_set:nn #1#2
+  {
+    \clist_map_inline:nn {#2}
+      {
+        \prop_get:NeNTF \g_@@_thesis_fm_alias_prop { \tl_to_str:n {##1} } \l_@@_thesis_tmp_tl
+          { \@@_thesis_fm_apply:nV {#1} \l_@@_thesis_tmp_tl }
+          { \msg_error:nnnn { tudcd } { thesis/fm-value } {#1} {##1} }
+      }
+  }
+\tl_new:N \l_@@_thesis_tmp_tl
+\cs_new_protected:Npn \@@_thesis_fm_apply:nn #1#2
+  {
+    \str_case:nn {#2}
+      {
+        { false }
+          {
+            \int_set:cn { l_@@_thesis_#1_level_int } { 0 }
+            \@@_thesis_fm_toc_preset:nn {#1} { 0 }
+          }
+        { true }
+          {
+            \int_set:cn { l_@@_thesis_#1_level_int } { 1 }
+            \@@_thesis_fm_toc_preset:nn {#1} { 0 }
+          }
+        { section }
+          {
+            \int_set:cn { l_@@_thesis_#1_level_int } { 2 }
+            \@@_thesis_fm_toc_preset:nn {#1} { 1 }
+          }
+        { chapter }
+          {
+            \int_set:cn { l_@@_thesis_#1_level_int } { 3 }
+            \@@_thesis_fm_toc_preset:nn {#1} { 1 }
+          }
+        { single } { \bool_set_false:c { l_@@_thesis_#1_multi_bool } }
+        { multiple } { \bool_set_true:c { l_@@_thesis_#1_multi_bool } }
+        { nofil } { \bool_set_false:c { l_@@_thesis_#1_fil_bool } }
+        { fil } { \bool_set_true:c { l_@@_thesis_#1_fil_bool } }
+        { markboth } { \bool_set_true:c { l_@@_thesis_#1_markboth_bool } }
+        { nomarkboth } { \bool_set_false:c { l_@@_thesis_#1_markboth_bool } }
+        { nottotoc } { \@@_thesis_fm_toc_set:nn {#1} { 0 } }
+        { totoc }
+          {
+            \@@_thesis_fm_toc_set:nn {#1}
+              { \int_compare:nNnTF { \int_use:c { l_@@_thesis_#1_toc_int } } < { 3 } { 1 } { 3 } }
+          }
+        { totocleveldown }
+          {
+            \@@_thesis_fm_toc_set:nn {#1}
+              { \int_compare:nNnTF { \int_use:c { l_@@_thesis_#1_toc_int } } < { 3 } { 2 } { 4 } }
+          }
+        { tocmultiple }
+          {
+            \int_compare:nNnT { \int_use:c { l_@@_thesis_#1_toc_int } } = { 0 }
+              { \int_set:cn { l_@@_thesis_#1_toc_int } { 1 } }
+            \int_compare:nNnT { \int_use:c { l_@@_thesis_#1_toc_int } } < { 3 }
+              { \int_add:cn { l_@@_thesis_#1_toc_int } { 2 } }
+            \bool_set_true:c { l_@@_thesis_#1_toc_locked_bool }
+          }
+      }
+  }
+\cs_generate_variant:Nn \@@_thesis_fm_apply:nn { nV }
+%</prelim-declaration>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*option&peri>
+  abstract .code:n = { \@@_thesis_fm_set:nn { abstract } {#1} },
+  abstract .default:n = true,
+  declaration .code:n = { \@@_thesis_fm_set:nn { declaration } {#1} },
+  declaration .default:n = true,
+%</option&peri>
+%    \end{macrocode}
+%
+% \subsubsection{Sprache des Logos}
+%
+% Die Sprache des Logos folgt per Voreinstellung der Hauptsprache des Dokuments.
+% Dafür wird vor dem Verarbeiten der Optionen \doption{logo/language}\dcode{=auto} gesetzt.
+% Wählen Nutzende explizit eine Sprache, so wird die automatische Erkennung wieder entfernt.
+%    \begin{macrocode}
+%<*optionloading&pre>
+\str_clear:N \l_@@_logolang_str
+\keys_set:nn { tudcd } { logo/language = auto }
+%</optionloading&pre>
+%<*optionloading&post>
+\str_if_empty:NF \l_@@_logolang_str
+  {
+    \hook_gremove_code:nn { package/babel/after } { tudcd-language-detection-babel }
+    \hook_gremove_code:nn { package/polyglossia/after } { tudcd-language-detection-polyglossia }
+  }
+\hook_gput_code:nnn { begindocument/before } { tudcd/thesis/logolanguage }
+  {
+    \str_if_empty:NTF \l_@@_logolang_str
+      { \str_set:Nn \l_@@_logolang_str { de } }
+      {
+        \str_case:VnF \l_@@_logolang_str { { de } { } { en } { } }
+          { \str_set:Nn \l_@@_logolang_str { en } }
+      }
+  }
+%</optionloading&post>
+%    \end{macrocode}
+%
+% \subsubsection{Voreinstellungen für \KOMAScript}
+%
+% Die Voreinstellungen der Option \doption{output} werden vor dem Laden von \dcode{scrbook} weitergereicht.
+% Da \KOMAScript{} die globalen Optionen aus \dmacro{\documentclass} vor den weitergereichten Optionen verarbeitet,
+% wird eine Voreinstellung nur dann weitergereicht, wenn keiner der zugehörigen Schlüssel explizit gesetzt worden ist.
+%    \begin{macrocode}
+%<*optionloading&post>
+\cs_new_protected:Npn \@@_thesis_koma_default:nn #1#2
+  {
+    \bool_set_false:N \l_tmpa_bool
+    \clist_map_inline:Nn \g_@@_thesis_user_koma_clist
+      {
+        \clist_map_inline:nn {#1}
+          { \str_if_eq:nnT {##1} {####1} { \bool_set_true:N \l_tmpa_bool } }
+      }
+    \bool_if:NF \l_tmpa_bool { \PassOptionsToClass {#2} { scrbook } }
+  }
+\str_if_eq:VnTF \l_@@_thesis_output_str { print }
+  {
+    \@@_thesis_koma_default:nn { oneside, twoside } { twoside }
+    \@@_thesis_koma_default:nn { open, openright, openany, openleft } { open=right }
+    \@@_thesis_koma_default:nn { cleardoublepage } { cleardoublepage=empty }
+    \@@_thesis_koma_default:nn { BCOR } { BCOR=10mm }
+  }
+  { \@@_thesis_koma_default:nn { oneside, twoside } { oneside } }
+%</optionloading&post>
+%    \end{macrocode}
+%
+% \subsection{Schriften}
+%
+% Der Fließtext bleibt in Computer Modern. Unter pdf\TeX{} wird dafür \dpkg{lmodern} mit der Kodierung T1 geladen,
+% die Auszeichnungsschrift Noto Sans stellt das Paket \dpkg{noto-sans} bereit.
+% Unter Lua\TeX{} und Xe\TeX{} ist Latin Modern bereits die Voreinstellung von \dpkg{fontspec},
+% Noto Sans wird direkt über die Dateinamen eingebunden.
+% Das Paket \dpkg{noto-sans} wird dort bewusst nicht genutzt, da es globale Schrifteigenschaften
+% (\dmacro{\defaultfontfeatures}) setzt, die von Nutzenden geladene Schriften beeinflussen würden.
+%
+% Das Paket \dpkg{iftex} wird wie bei \dpkg{tudscr} immer geladen, da viele Vorlagen \dmacro{\iftutex} verwenden.
+%    \begin{macrocode}
+%<*body&peri>
+\RequirePackage{iftex}
+\sys_if_engine_opentype:TF
+  {
+    \RequirePackage{fontspec}
+    \setsansfont { NotoSans }
+      [
+        Extension = .ttf ,
+        UprightFont = *-Regular ,
+        ItalicFont = *-Italic ,
+        BoldFont = *-SemiBold ,
+        BoldItalicFont = *-SemiBoldItalic
+      ]
+  }
+  {
+    \RequirePackage[T1]{fontenc}
+    \RequirePackage{lmodern}
+    \RequirePackage[semibold]{noto-sans}
+  }
+\hook_gput_code:nnn { begindocument/before } { tudcd/thesis/bodyfont }
+  {
+    \bool_if:NT \l_@@_thesis_bodyfont_noto_bool
+      {
+        \renewcommand*{\familydefault}{\sfdefault}
+        \normalfont
+      }
+  }
+%</body&peri>
+%    \end{macrocode}
+%
+% \subsection{Gestaltungselemente}
+%
+% Alle Gliederungsüberschriften und, da \dcode{scrbook} diese von \dcode{disposition} ableitet,
+% auch die Kapiteleinträge im Inhaltsverzeichnis werden in Noto Sans und der Hervorhebungsfarbe gesetzt.
+%    \begin{macrocode}
+%<*body&peri>
+\setkomafont{disposition}{\normalcolor\sffamily\bfseries\@@_select_highlight_color:}
+%    \end{macrocode}
+%
+% Für die Titelseite werden die Elemente von \KOMAScript{} angepasst und zwei neue Elemente angelegt:
+% \dcode{thesis} für die Art der Arbeit und den akademischen Grad sowie \dcode{titleinfo} für alle
+% weiteren Angaben.
+%    \begin{macrocode}
+\setkomafont{title}{\usekomafont{disposition}\huge}
+\setkomafont{subtitle}{\usekomafont{title}\Large\mdseries}
+\setkomafont{subject}{\normalcolor\sffamily\Large}
+\setkomafont{author}{\normalcolor\sffamily\Large}
+\setkomafont{date}{\normalcolor\sffamily}
+\setkomafont{publishers}{\normalcolor\sffamily}
+\newkomafont{thesis}{\usekomafont{disposition}\Large}
+\newkomafont{titleinfo}{\normalcolor\sffamily}
+%    \end{macrocode}
+%
+% \subsection{Seitenstile}
+%
+% Es werden die Seitenstile von \dpkg{scrlayer-scrpage} verwendet.
+% Kopf- und Fußzeile erhalten Noto Sans und die Hervorhebungsfarbe.
+% Für Dokumente, welche für \dcode{tudscrreprt} geschrieben wurden, werden die dortigen Seitenstile
+% als Aliase bereitgestellt.
+%    \begin{macrocode}
+\RequirePackage{scrlayer-scrpage}
+\setkomafont{pageheadfoot}{\normalcolor\sffamily\@@_select_highlight_color:}
+\automark[section]{chapter}
+\pagestyle{scrheadings}
+\DeclarePageStyleAlias{tudheadings}{scrheadings}
+\DeclarePageStyleAlias{plain.tudheadings}{plain.scrheadings}
+\DeclarePageStyleAlias{empty.tudheadings}{empty}
+%    \end{macrocode}
+%
+% Wird \dpkg{hyperref} geladen, erhalten Verweise die Hervorhebungsfarbe, im Druck also Schwarz.
+% Eigene Einstellungen mittels \dmacro{\hypersetup} haben Vorrang.
+%    \begin{macrocode}
+\hook_gput_code:nnn { package/hyperref/after } { tudcd/thesis }
+  { \hypersetup { colorlinks , allcolors = highlightcolor } }
+%</body&peri>
+%    \end{macrocode}
+%
+% \subsection{Optionen nach dem Laden der Klasse}
+%
+% \begin{codedescribe}[macro,new=0.8.0]{\TUDoptions,\TUDoption}
+% \begin{codesyntax}
+% \tsmacro{\TUDoptions}{Schlüssel-Wert-Liste}
+%
+% \tsmacro{\TUDoption}{Schlüssel,Wert}
+% \end{codesyntax}
+% Zur Kompatibilität mit \dpkg{tudscr} existieren beide Befehle als Alternativen zu \dmacro{\TUDCDsetup}.
+% Unbekannte Schlüssel werden nach dem Laden der Klasse an \dmacro{\KOMAoptions} weitergereicht.
+% Kennt auch \KOMAScript{} den Schlüssel nicht (bspw.\@ die Layoutoptionen von \dpkg{tudscr}),
+% wird er mit einer Warnung ignoriert.
+% \end{codedescribe}
+%
+% Ob \KOMAScript{} einen Schlüssel kennt, wird anhand der Makros \dcode{KV@<Mitglied>@<Schlüssel>}
+% aller Mitglieder der Familie \dcode{KOMA} geprüft, wie es auch \dpkg{scrbase} selbst tut.
+%    \begin{macrocode}
+%<*body&peri>
+\NewDocumentCommand \TUDoptions { m } { \keys_set:nn { tudcd } {#1} }
+\NewDocumentCommand \TUDoption { m m } { \keys_set:nn { tudcd } { #1 = {#2} } }
+\msg_new:nnnn { tudcd } { thesis/unknown-option }
+  { Unknown~option~'#1'~ignored. }
+  {
+    '#1'~is~neither~an~option~of~tudcdthesis~nor~of~KOMA-Script.~
+    The~layout~options~of~tudscr~are~not~supported~by~tudcdthesis.
+  }
+\prg_new_protected_conditional:Npnn \@@_thesis_if_koma_key:n #1 { TF }
+  {
+    \bool_set_false:N \l_tmpa_bool
+    \clist_map_inline:en { KOMA, \cs_if_exist_use:c { KOMA@key@familylist } }
+      { \cs_if_exist:cT { KV@##1@#1 } { \bool_set_true:N \l_tmpa_bool } }
+    \bool_if:NTF \l_tmpa_bool { \prg_return_true: } { \prg_return_false: }
+  }
+\cs_generate_variant:Nn \clist_map_inline:nn { en }
+\keys_define:nn { tudcd }
+  {
+    unknown .code:n =
+      {
+        \exp_args:NV \@@_thesis_if_koma_key:nTF \l_keys_key_str
+          {
+            \tl_if_novalue:nTF {#1}
+              { \exp_args:Ne \KOMAoptions { \l_keys_key_str } }
+              { \exp_args:Ne \KOMAoptions { \l_keys_key_str = \exp_not:n {#1} } }
+          }
+          { \msg_warning:nnV { tudcd } { thesis/unknown-option } \l_keys_key_str }
+      }
+  }
+%</body&peri>
+%    \end{macrocode}
+%
+% \subsection{Eingabefelder}
+%
+% Die Felder werden wie bei \dpkg{tudscr} in Makros der Form \dcode{\textbackslash @<Feld>} gespeichert,
+% damit eigene Texte (beispielsweise mittels \dmacro{\renewcaptionname}) über \dmacro{\getfield} darauf zugreifen können.
+%
+% \begin{codedescribe}[macro,new=0.8.0]{\faculty,\department,\institute,\chair}
+% \begin{codesyntax}
+% \tsmacro{\faculty}[ignoriert]{Fakultät}
+% \end{codesyntax}
+% Die Organisationseinheiten werden auf der Titelseite unter dem Logo ausgegeben.
+% Das optionale Argument wird aus Kompatibilitätsgründen akzeptiert und ignoriert.
+% \end{codedescribe}
+%    \begin{macrocode}
+%<*body&peri>
+\cs_new_protected:Npn \@@_thesis_new_field:nn #1#2
+  {
+    \tl_gclear_new:c { @#1 }
+    \tl_gset:cn { @#1 } {#2}
+  }
+\clist_map_inline:nn { faculty, department, institute, chair }
+  {
+    \@@_thesis_new_field:nn {#1} { }
+    \exp_args:Nc \NewDocumentCommand { #1 } { o m }
+      { \tl_gset:cn { @#1 } {##2} }
+  }
+%    \end{macrocode}
+%
+% \begin{codedescribe}[macro,new=0.8.0]{\supervisor,\professor,\referee,\advisor,\company,\defensedate,\place,\confirmationclosing}
+% \begin{codesyntax}
+% \tsmacro{\supervisor}{Name \textbackslash and Name}
+% \end{codesyntax}
+% Betreuende, Hochschullehrende, Gutachtende und Fachreferenten werden mit \dmacro{\and} getrennt.
+% \dmacro{\company} wird im Sperrvermerk, \dmacro{\place} (Voreinstellung: Dresden) und
+% \dmacro{\confirmationclosing} in der Selbstständigkeitserklärung verwendet.
+% \end{codedescribe}
+%    \begin{macrocode}
+\clist_map_inline:nn
+  { supervisor, professor, referee, advisor, company, defensedate, place }
+  {
+    \@@_thesis_new_field:nn {#1} { }
+    \exp_args:Nc \NewDocumentCommand { #1 } { m }
+      { \tl_gset:cn { @#1 } {##1} }
+  }
+\tl_gset:Nn \@place { Dresden }
+\@@_thesis_new_field:nn { supporter } { }
+\NewDocumentCommand \confirmationclosing { m }
+  { \tl_gset:Nn \@confirmationclosing {#1} }
+%    \end{macrocode}
+%
+% \begin{codedescribe}[macro,new=0.8.0]{\thesis,\subject}
+% \begin{codesyntax}
+% \tsmacro{\thesis}{Art der Arbeit}
+%
+% \tsmacro{\subject}{Art der Arbeit}
+% \end{codesyntax}
+% Die Art der Arbeit kann als Freitext oder als eines der Schlüsselwörter
+% \dcode{habil}, \dcode{diss} (\dcode{doctoral}, \dcode{phd}), \dcode{diploma}, \dcode{master},
+% \dcode{bachelor}, \dcode{student}, \dcode{evidence}, \dcode{project}, \dcode{seminar},
+% \dcode{term}, \dcode{research}, \dcode{log}, \dcode{report} und \dcode{internship}
+% angegeben werden. Schlüsselwörter werden durch die sprachabhängige Bezeichnung ersetzt.
+% Wird \dmacro{\subject} verwendet und ist noch keine Art der Arbeit gesetzt, so wird diese übernommen.
+% \end{codedescribe}
+%    \begin{macrocode}
+\@@_thesis_new_field:nn { thesis } { }
+\prop_const_from_keyval:Nn \c_@@_thesis_type_prop
+  {
+    habil = \habilitationname ,
+    diss = \dissertationname ,
+    doctoral = \dissertationname ,
+    phd = \dissertationname ,
+    diploma = \diplomathesisname ,
+    master = \masterthesisname ,
+    bachelor = \bachelorthesisname ,
+    student = \studentthesisname ,
+    evidence = \studentresearchname ,
+    project = \projectpapername ,
+    seminar = \seminarpapername ,
+    term = \termpapername ,
+    research = \researchname ,
+    log = \logname ,
+    report = \reportname ,
+    internship = \internshipname
+  }
+\cs_new_protected:Npn \@@_thesis_type_set:Nn #1#2
+  {
+    \prop_get:NeNTF \c_@@_thesis_type_prop { \tl_trim_spaces:n {#2} } \l_@@_thesis_tmp_tl
+      { \tl_gset_eq:NN #1 \l_@@_thesis_tmp_tl }
+      { \tl_gset:Nn #1 {#2} }
+  }
+\NewDocumentCommand \thesis { m } { \@@_thesis_type_set:Nn \@thesis {#1} }
+\RenewDocumentCommand \subject { m }
+  {
+    \@@_thesis_type_set:Nn \@subject {#1}
+    \tl_if_empty:NT \@thesis { \tl_gset_eq:NN \@thesis \@subject }
+  }
+%    \end{macrocode}
+%
+% \begin{codedescribe}[macro,new=0.8.0]{\graduation}
+% \begin{codesyntax}
+% \tsmacro{\graduation}[Abkürzung]{Akademischer Grad}
+% \end{codesyntax}
+% \end{codedescribe}
+%    \begin{macrocode}
+\@@_thesis_new_field:nn { graduation } { }
+\@@_thesis_new_field:nn { graduationabbreviation } { }
+\NewDocumentCommand \graduation { o m }
+  {
+    \tl_gset:Nn \@graduation {#2}
+    \IfValueTF {#1}
+      { \tl_gset:Nn \@graduationabbreviation {#1} }
+      { \tl_gclear:N \@graduationabbreviation }
+  }
+%    \end{macrocode}
+%
+% Der Titel wird zusätzlich in \dcode{\textbackslash tudcd@thesis@title} gespeichert, damit die Texte der Erklärungen
+% prüfen können, ob ein Titel gesetzt worden ist.
+%    \begin{macrocode}
+\tl_new:N \tudcd@thesis@title
+\RenewDocumentCommand \title { m }
+  {
+    \tl_gset:Nn \@title {#1}
+    \tl_gset:Nn \tudcd@thesis@title {#1}
+  }
+%    \end{macrocode}
+%
+% \begin{codedescribe}[macro,new=0.8.0]{\getfield}
+% \begin{codesyntax}
+% \tsmacro{\getfield}[Befehl]{Feld}
+% \end{codesyntax}
+% Gibt den Inhalt eines Feldes aus, beispielsweise \dcode{\textbackslash getfield\{title\}}.
+% Ist ein \tsobj[oarg]{Befehl} angegeben, wird diesem der Inhalt als Argument übergeben.
+% \end{codedescribe}
+%    \begin{macrocode}
+\msg_new:nnn { tudcd } { thesis/unknown-field }
+  { The~field~'#1'~is~unknown~and~cannot~be~printed. }
+\NewExpandableDocumentCommand \getfield { o m }
+  {
+    \cs_if_exist:cTF { @#2 }
+      { \IfValueTF {#1} { #1 { \use:c { @#2 } } } { \use:c { @#2 } } }
+      { \msg_expandable_error:nnn { tudcd } { thesis/unknown-field } {#2} }
+  }
+%</body&peri>
+%    \end{macrocode}
+%
+% \subsubsection{Angaben zu den Autoren}
+%
+% \begin{codedescribe}[macro,new=0.8.0]{\matriculationnumber,\matriculationyear,\dateofbirth,\placeofbirth,\course,\discipline,\emailaddress,\authormore}
+% \begin{codesyntax}
+% \tsmacro{\matriculationnumber}{Matrikelnummer}
+%
+% \tsmacro{\emailaddress}[ignoriert]{E-Mail-Adresse}
+% \end{codesyntax}
+% Die Angaben können außerhalb von \dmacro{\author} für alle Autoren oder innerhalb von \dmacro{\author}
+% direkt nach dem jeweiligen Namen für einzelne Autoren gesetzt werden.
+% Bei der gesternten Variante von \dmacro{\emailaddress} wird die Adresse nicht verlinkt.
+% \end{codedescribe}
+%
+% Außerhalb von \dmacro{\author} speichern die Befehle den Wert global.
+%    \begin{macrocode}
+%<*body&peri>
+\clist_const:Nn \c_@@_thesis_authorfields_clist
+  {
+    matriculationnumber, matriculationyear, dateofbirth, placeofbirth,
+    course, discipline, emailaddress, authormore
+  }
+\clist_map_inline:Nn \c_@@_thesis_authorfields_clist
+  { \@@_thesis_new_field:nn {#1} { } }
+\bool_new:N \g_@@_thesis_emailaddress_nolink_bool
+\clist_map_inline:nn
+  {
+    matriculationnumber, matriculationyear, dateofbirth, placeofbirth,
+    course, discipline, authormore
+  }
+  {
+    \exp_args:Nc \NewDocumentCommand { #1 } { m }
+      { \tl_gset:cn { @#1 } {##1} }
+  }
+\NewDocumentCommand \emailaddress { s o m }
+  {
+    \tl_gset:Nn \@emailaddress {#3}
+    \bool_gset:Nn \g_@@_thesis_emailaddress_nolink_bool {#1}
+  }
+%    \end{macrocode}
+%
+% Innerhalb von \dmacro{\author} wird die Liste beim Aufruf an \dmacro{\and} getrennt.
+% Für jeden Autor werden die Angaben zweimal ausgewertet:
+% Einmal in einer Box, in welcher die Befehle ihren Wert in einer Eigenschaftsliste je Autor ablegen,
+% und einmal expandierend, wobei die Befehle samt Argument entfernt werden und nur der Name übrig bleibt.
+% \dcode{\textbackslash @author} enthält anschließend nur die Namen, getrennt durch \dmacro{\and}.
+%    \begin{macrocode}
+\seq_new:N \g_@@_thesis_author_seq
+\int_new:N \g_@@_thesis_author_int
+\seq_new:N \l_@@_thesis_tmp_seq
+\box_new:N \l_@@_thesis_tmp_box
+\cs_new_protected:Npn \@@_thesis_author_collect:
+  {
+    \clist_map_inline:Nn \c_@@_thesis_authorfields_clist
+      {
+        \cs_set_protected:cpn {##1} ####1
+          {
+            \prop_gput:cnn
+              { g_@@_thesis_author_ \int_use:N \g_@@_thesis_author_int _prop }
+              {##1} {####1}
+          }
+      }
+    \DeclareDocumentCommand \emailaddress { s o m }
+      {
+        \prop_gput:cnn
+          { g_@@_thesis_author_ \int_use:N \g_@@_thesis_author_int _prop }
+          { emailaddress } {##3}
+        \IfBooleanT {##1}
+          {
+            \prop_gput:cnn
+              { g_@@_thesis_author_ \int_use:N \g_@@_thesis_author_int _prop }
+              { emailaddressnolink } { }
+          }
+      }
+  }
+\cs_new_protected:Npn \@@_thesis_author_strip:
+  {
+    \clist_map_inline:Nn \c_@@_thesis_authorfields_clist
+      { \cs_set:cpn {##1} ####1 { } }
+    \DeclareExpandableDocumentCommand \emailaddress { s o m } { }
+  }
+\cs_new_protected:Npn \@@_thesis_author_parse:n #1
+  {
+    \seq_gclear:N \g_@@_thesis_author_seq
+    \int_gzero:N \g_@@_thesis_author_int
+    \seq_set_split:Nnn \l_@@_thesis_tmp_seq { \and } {#1}
+    \seq_map_inline:Nn \l_@@_thesis_tmp_seq
+      {
+        \int_gincr:N \g_@@_thesis_author_int
+        \prop_gclear_new:c
+          { g_@@_thesis_author_ \int_use:N \g_@@_thesis_author_int _prop }
+        \group_begin:
+          \@@_thesis_author_collect:
+          \cs_set_eq:NN \thanks \use_none:n
+          \hbox_set:Nn \l_@@_thesis_tmp_box {##1}
+        \group_end:
+        \group_begin:
+          \@@_thesis_author_strip:
+          \protected@edef \l_@@_thesis_tmp_tl {##1}
+          \tl_set:Ne \l_@@_thesis_tmp_tl { \tl_trim_spaces:V \l_@@_thesis_tmp_tl }
+          \seq_gput_right:NV \g_@@_thesis_author_seq \l_@@_thesis_tmp_tl
+        \group_end:
+      }
+    \tl_gset:Ne \@author
+      { \seq_use:Nn \g_@@_thesis_author_seq { \exp_not:N \and } }
+  }
+\RenewDocumentCommand \author { m } { \@@_thesis_author_parse:n {#1} }
+%    \end{macrocode}
+%
+% Ein Feld eines Autors wird aus dessen Eigenschaftsliste gelesen,
+% ist es dort nicht vorhanden, wird der globale Wert verwendet.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_thesis_author_get:nnN #1#2#3
+  {
+    \prop_get:cnNF { g_@@_thesis_author_ #1 _prop } {#2} #3
+      { \tl_set_eq:Nc #3 { @#2 } }
+  }
+%</body&peri>
+%    \end{macrocode}
+%
+% \subsection{Lokalisierung}
+%
+% Die Bezeichner werden aus \dpkg{tudscr} übernommen und mittels \dmacro{\providecaptionname}
+% für alle deutschen und englischen Sprachvarianten definiert.
+% Sie lassen sich mit \dmacro{\renewcaptionname} überschreiben.
+%
+% Um zu prüfen, ob eine Liste von Personen mehr als eine Person enthält, wird ein Hilfsmakro bereitgestellt,
+% welches auch in eigenen Bezeichnern genutzt werden kann.
+%    \begin{macrocode}
+%<*body&peri>
+\cs_new_protected:Npn \tudcd@thesis@ifand #1
+  { \tl_if_in:NnTF #1 { \and } }
+%    \end{macrocode}
+%
+% Die Texte werden außerhalb der \dpkg{expl3}-Syntax definiert, um Leerzeichen setzen zu können.
+%    \begin{macrocode}
+\ExplSyntaxOff
+\newcommand*\tudcd@thesis@german{%
+  \providecaptionname{%
+    german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
+  }%
+}
+\tudcd@thesis@german{\graduationtext}{%
+  zur Erlangung des akademischen Grades%
+}
+\tudcd@thesis@german{\refereename}{%
+  \tudcd@thesis@ifand{\@referee}{%
+    \ifx\refereeothername\@empty Gutachter\else Erstgutachter\fi
+  }{Gutachter}%
+}
+\tudcd@thesis@german{\refereeothername}{Zweitgutachter}
+\tudcd@thesis@german{\advisorname}{%
+  \tudcd@thesis@ifand{\@advisor}{%
+    \ifx\advisorothername\@empty Fachreferenten\else Erster Fachreferent\fi
+  }{Fachreferent}%
+}
+\tudcd@thesis@german{\advisorothername}{}
+\tudcd@thesis@german{\supervisorname}{%
+  \tudcd@thesis@ifand{\@supervisor}{%
+    \ifx\supervisorothername\@empty Betreuer\else Erstbetreuer\fi
+  }{Betreuer}%
+}
+\tudcd@thesis@german{\supervisorothername}{}
+\tudcd@thesis@german{\professorname}{%
+  \tudcd@thesis@ifand{\@professor}{%
+    \ifx\professorothername\@empty
+      Betreuende Hochschullehrer%
+    \else
+      Erster betreuender Hochschullehrer%
+    \fi
+  }{Betreuender Hochschullehrer}%
+}
+\tudcd@thesis@german{\professorothername}{}
+\tudcd@thesis@german{\datetext}{Eingereicht am}
+\tudcd@thesis@german{\dateofbirthtext}{Geboren am}
+\tudcd@thesis@german{\placeofbirthtext}{in}
+\tudcd@thesis@german{\defensedatetext}{Verteidigt am}
+\tudcd@thesis@german{\matriculationyearname}{Immatrikulationsjahr}
+\tudcd@thesis@german{\matriculationnumbername}{Matrikelnummer}
+\tudcd@thesis@german{\coursename}{Studiengang}
+\tudcd@thesis@german{\disciplinename}{Studienrichtung}
+\tudcd@thesis@german{\abstractname}{Zusammenfassung}
+\tudcd@thesis@german{\confirmationname}{Selbstst\"andigkeitserkl\"arung}
+\tudcd@thesis@german{\confirmationtext}{%
+  Hiermit versichere ich, dass ich das vorliegende Dokument %
+  \ifx\tudcd@thesis@title\@empty\else
+    mit dem Titel \emph{\tudcd@thesis@title} %
+  \fi
+  selbstst\"andig und ohne unzul\"assige Hilfe Dritter verfasst habe. %
+  Es wurden keine anderen als die in diesem Dokument angegebenen Hilfsmittel %
+  und Quellen benutzt. Die w\"ortlichen und sinngem\"a\ss{} %
+  \"ubernommenen Zitate habe ich als solche kenntlich gemacht. %
+  \ifx\@supporter\@empty
+    Es waren keine weiteren Personen an der geistigen Herstellung %
+    des vorliegenden Dokumentes beteiligt. %
+  \else
+    W\"ahrend der Anfertigung dieses Dokumentes wurde ich nur von %
+    folgenden Personen unterst\"utzt:%
+    \begin{quote}\def\and{\newline}\@supporter\end{quote}%
+    \noindent Zus\"atzliche Personen waren an der geistigen Herstellung %
+    des vorliegenden Dokumentes nicht beteiligt. %
+  \fi
+  Mir ist bekannt, dass die Nichteinhaltung dieser Erkl\"arung zum %
+  nachtr\"aglichen Entzug des Hochschulabschlusses f\"uhren kann.%
+}
+\tudcd@thesis@german{\blockingname}{Sperrvermerk}
+\tudcd@thesis@german{\blockingtext}{%
+  Dieses Dokument %
+  \ifx\tudcd@thesis@title\@empty\else
+    mit dem Titel \emph{\tudcd@thesis@title} %
+  \fi
+  enth\"alt vertrauliche Informationen%
+  \ifx\@company\@empty\else, offengelegt durch \emph{\@company}\fi. %
+  Ver\"offentlichungen, Vervielf\"altigungen und Einsichtnahme~-- auch nur %
+  auszugsweise~-- sind ohne ausdr\"uckliche Genehmigung %
+  \ifx\@company\@empty\else durch \emph{\@company} \fi
+  nicht gestattet, ebenso wie Ver\"offentlichungen \"uber den Inhalt dieses %
+  Dokumentes. Es ist nur dem Betreuer an der Technischen Universit\"at %
+  Dresden, den Gutachtern sowie den Mitgliedern des Pr\"ufungsausschusses %
+  zug\"anglich zu machen.%
+}
+\tudcd@thesis@german{\habilitationname}{Habilitation}
+\tudcd@thesis@german{\dissertationname}{Dissertation}
+\tudcd@thesis@german{\diplomathesisname}{Diplomarbeit}
+\tudcd@thesis@german{\masterthesisname}{Master-Arbeit}
+\tudcd@thesis@german{\bachelorthesisname}{Bachelor-Arbeit}
+\tudcd@thesis@german{\studentthesisname}{Studienarbeit}
+\tudcd@thesis@german{\studentresearchname}{Gro\ss{}er Beleg}
+\tudcd@thesis@german{\projectpapername}{Projektarbeit}
+\tudcd@thesis@german{\seminarpapername}{Seminararbeit}
+\tudcd@thesis@german{\termpapername}{Hausarbeit}
+\tudcd@thesis@german{\researchname}{Forschungsbericht}
+\tudcd@thesis@german{\logname}{Protokoll}
+\tudcd@thesis@german{\internshipname}{Praktikumsbericht}
+\tudcd@thesis@german{\reportname}{Bericht}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\newcommand*\tudcd@thesis@english{%
+  \providecaptionname{%
+    american,australian,british,canadian,english,newzealand,UKenglish,USenglish%
+  }%
+}
+\tudcd@thesis@english{\graduationtext}{to achieve the academic degree}
+\tudcd@thesis@english{\refereename}{%
+  \tudcd@thesis@ifand{\@referee}{%
+    \ifx\refereeothername\@empty Referees\else First referee\fi
+  }{Referee}%
+}
+\tudcd@thesis@english{\refereeothername}{Second referee}
+\tudcd@thesis@english{\advisorname}{%
+  \tudcd@thesis@ifand{\@advisor}{%
+    \ifx\advisorothername\@empty Advisors\else First advisor\fi
+  }{Advisor}%
+}
+\tudcd@thesis@english{\advisorothername}{}
+\tudcd@thesis@english{\supervisorname}{%
+  \tudcd@thesis@ifand{\@supervisor}{%
+    \ifx\supervisorothername\@empty Supervisors\else First supervisor\fi
+  }{Supervisor}%
+}
+\tudcd@thesis@english{\supervisorothername}{}
+\tudcd@thesis@english{\professorname}{%
+  \tudcd@thesis@ifand{\@professor}{%
+    \ifx\professorothername\@empty
+      Supervising professors%
+    \else
+      First supervising professor%
+    \fi
+  }{Supervising professor}%
+}
+\tudcd@thesis@english{\professorothername}{}
+\tudcd@thesis@english{\datetext}{Submitted on}
+\tudcd@thesis@english{\dateofbirthtext}{Born on}
+\tudcd@thesis@english{\placeofbirthtext}{in}
+\tudcd@thesis@english{\defensedatetext}{Defended on}
+\tudcd@thesis@english{\matriculationyearname}{Matriculation year}
+\tudcd@thesis@english{\matriculationnumbername}{Matriculation number}
+\tudcd@thesis@english{\coursename}{Course}
+\tudcd@thesis@english{\disciplinename}{Discipline}
+\tudcd@thesis@english{\abstractname}{Abstract}
+\tudcd@thesis@english{\confirmationname}{Statement of authorship}
+\tudcd@thesis@english{\confirmationtext}{%
+  I hereby certify that I have authored this document %
+  \ifx\tudcd@thesis@title\@empty\else
+    entitled \emph{\tudcd@thesis@title} %
+  \fi
+  independently and without undue assistance from third %
+  parties. No other than the resources and references %
+  indicated in this document have been used. I have marked %
+  both literal and accordingly adopted quotations as such. %
+  \ifx\@supporter\@empty
+    There were no additional persons involved in the %
+  \else
+    During the preparation of this document I was only %
+    supported by the following persons:%
+    \begin{quote}\def\and{\newline}\@supporter\end{quote}%
+    \noindent Additional persons were not involved in the %
+  \fi
+  intellectual preparation of the present document. %
+  I am aware that violations of this declaration may lead to %
+  subsequent withdrawal of the academic degree.%
+}
+\tudcd@thesis@english{\blockingname}{Restriction note}
+\tudcd@thesis@english{\blockingtext}{%
+  This document %
+  \ifx\tudcd@thesis@title\@empty\else
+    entitled \emph{\tudcd@thesis@title} %
+  \fi
+  contains confidential data%
+  \ifx\@company\@empty\else, disclosed by \emph{\@company}\fi. %
+  Publications, duplications and inspections---even in part---are prohibited %
+  without explicit permission%
+  \ifx\@company\@empty\else\space by \emph{\@company}\fi, %
+  as well as publications about the content of this document. %
+  It may only be made accessible to the supervisor at Technische Universit\"at %
+  Dresden, the reviewers and also the members of the examination board.%
+}
+\tudcd@thesis@english{\habilitationname}{Habilitation}
+\tudcd@thesis@english{\dissertationname}{Dissertation}
+\tudcd@thesis@english{\diplomathesisname}{Diploma Thesis}
+\tudcd@thesis@english{\masterthesisname}{Master Thesis}
+\tudcd@thesis@english{\bachelorthesisname}{Bachelor Thesis}
+\tudcd@thesis@english{\studentthesisname}{Student Thesis}
+\tudcd@thesis@english{\studentresearchname}{Student Research Project}
+\tudcd@thesis@english{\projectpapername}{Project Paper}
+\tudcd@thesis@english{\seminarpapername}{Seminar Paper}
+\tudcd@thesis@english{\termpapername}{Term Paper}
+\tudcd@thesis@english{\researchname}{Research Report}
+\tudcd@thesis@english{\logname}{Log}
+\tudcd@thesis@english{\internshipname}{Internship Report}
+\tudcd@thesis@english{\reportname}{Report}
+\ExplSyntaxOn
+%</body&peri>
+%    \end{macrocode}
+%
+% \subsection{Die Titelseite}
+%
+% \begin{codedescribe}[macro,new=0.8.0]{\maketitle}
+% \begin{codesyntax}
+% \tsmacro{\maketitle}[Seitenzahl]
+% \end{codesyntax}
+% Setzt die Titelseite mit Logo, Organisationseinheiten, Art der Arbeit, Titel, Autoren, akademischem Grad,
+% den betreuenden Personen sowie den Daten der Einreichung und Verteidigung.
+% Anschließend folgen, sofern angegeben, die Titelrückseite (\dmacro{\uppertitleback}, \dmacro{\lowertitleback})
+% und die Widmung (\dmacro{\dedication}).
+% \end{codedescribe}
+%
+% Eine Zeile mit Angaben wird nur ausgegeben, wenn der Inhalt nicht leer ist.
+%    \begin{macrocode}
+%<*body&peri>
+\dim_new:N \l_@@_thesis_title_logo_dim
+\dim_set:Nn \l_@@_thesis_title_logo_dim { 15mm }
+\cs_new_protected:Npn \@@_thesis_title_line:N #1
+  { \tl_if_empty:NF #1 { #1 \par } }
+\cs_new_protected:Npn \@@_thesis_title_line:nN #1#2
+  { \tl_if_empty:NF #2 { #1 : ~ #2 \par } }
+%    \end{macrocode}
+%
+% Der Block eines Autors besteht aus dem Namen und den zugehörigen Angaben.
+%    \begin{macrocode}
+\tl_new:N \l_@@_thesis_title_a_tl
+\tl_new:N \l_@@_thesis_title_b_tl
+\cs_new_protected:Npn \@@_thesis_title_author:nn #1#2
+  {
+    { \usekomafont{author} #2 \par }
+    \group_begin:
+      \usekomafont{titleinfo}
+      \@@_thesis_author_get:nnN {#1} { emailaddress } \l_@@_thesis_title_a_tl
+      \tl_if_empty:NF \l_@@_thesis_title_a_tl
+        {
+          \prop_if_in:cnTF { g_@@_thesis_author_ #1 _prop } { emailaddressnolink }
+            { \bool_set_true:N \l_tmpa_bool }
+            { \bool_set_eq:NN \l_tmpa_bool \g_@@_thesis_emailaddress_nolink_bool }
+          \bool_lazy_or:nnTF { \l_tmpa_bool } { ! \cs_if_exist_p:N \href }
+            { \l_@@_thesis_title_a_tl \par }
+            {
+              \exp_args:Ne \href { mailto: \l_@@_thesis_title_a_tl }
+                { \l_@@_thesis_title_a_tl } \par
+            }
+        }
+      \@@_thesis_author_get:nnN {#1} { authormore } \l_@@_thesis_title_a_tl
+      \@@_thesis_title_line:N \l_@@_thesis_title_a_tl
+      \@@_thesis_author_get:nnN {#1} { course } \l_@@_thesis_title_a_tl
+      \@@_thesis_title_line:nN { \coursename } \l_@@_thesis_title_a_tl
+      \@@_thesis_author_get:nnN {#1} { discipline } \l_@@_thesis_title_a_tl
+      \@@_thesis_title_line:nN { \disciplinename } \l_@@_thesis_title_a_tl
+      \@@_thesis_author_get:nnN {#1} { dateofbirth } \l_@@_thesis_title_a_tl
+      \@@_thesis_author_get:nnN {#1} { placeofbirth } \l_@@_thesis_title_b_tl
+      \tl_if_empty:NF \l_@@_thesis_title_a_tl
+        {
+          \dateofbirthtext \c_space_tl \l_@@_thesis_title_a_tl
+          \tl_if_empty:NF \l_@@_thesis_title_b_tl
+            { \c_space_tl \placeofbirthtext \c_space_tl \l_@@_thesis_title_b_tl }
+          \par
+        }
+      \@@_thesis_author_get:nnN {#1} { matriculationnumber } \l_@@_thesis_title_a_tl
+      \@@_thesis_title_line:nN { \matriculationnumbername } \l_@@_thesis_title_a_tl
+      \@@_thesis_author_get:nnN {#1} { matriculationyear } \l_@@_thesis_title_a_tl
+      \@@_thesis_title_line:nN { \matriculationyearname } \l_@@_thesis_title_a_tl
+    \group_end:
+  }
+\cs_new_protected:Npn \@@_thesis_title_authors:
+  {
+    \seq_if_empty:NTF \g_@@_thesis_author_seq
+      { { \usekomafont{author} \@author \par } }
+      {
+        \seq_map_indexed_inline:Nn \g_@@_thesis_author_seq
+          {
+            \int_compare:nNnF {##1} = { 1 } { \medskip }
+            \@@_thesis_title_author:nn {##1} {##2}
+          }
+      }
+  }
+%    \end{macrocode}
+%
+% Die betreuenden Personen werden in einer Tabelle ausgegeben.
+% Enthält eine Liste mehrere Personen und ist die Bezeichnung für die weiteren Personen (bspw.\@ \dmacro{\refereeothername})
+% nicht leer, so erhält jede weitere Person eine eigene Bezeichnung, ansonsten wird die Mehrzahl verwendet.
+%    \begin{macrocode}
+\tl_new:N \l_@@_thesis_title_rows_tl
+\cs_generate_variant:Nn \seq_set_split:Nnn { Nnv }
+\cs_new_protected:Npn \@@_thesis_title_row:nn #1#2
+  {
+    \tl_put_right:Nn \l_@@_thesis_title_rows_tl
+      { \tl_if_blank:nF {#1} { #1 : } & #2 \\ }
+  }
+\cs_new_protected:Npn \@@_thesis_title_names:n #1
+  {
+    \tl_if_empty:cF { @#1 }
+      {
+        \seq_set_split:Nnv \l_@@_thesis_tmp_seq { \and } { @#1 }
+        \bool_lazy_and:nnTF
+          { \int_compare_p:nNn { \seq_count:N \l_@@_thesis_tmp_seq } > { 1 } }
+          { ! \tl_if_empty_p:c { #1othername } }
+          {
+            \seq_map_indexed_inline:Nn \l_@@_thesis_tmp_seq
+              {
+                \int_compare:nNnTF {##1} = { 1 }
+                  { \@@_thesis_title_row:nn { \use:c { #1name } } {##2} }
+                  { \@@_thesis_title_row:nn { \use:c { #1othername } } {##2} }
+              }
+          }
+          {
+            \seq_map_indexed_inline:Nn \l_@@_thesis_tmp_seq
+              {
+                \int_compare:nNnTF {##1} = { 1 }
+                  { \@@_thesis_title_row:nn { \use:c { #1name } } {##2} }
+                  { \@@_thesis_title_row:nn { } {##2} }
+              }
+          }
+      }
+  }
+%    \end{macrocode}
+%
+% Der eigentliche Satz der Titelseite.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_thesis_title_page:
+  {
+    \group_begin:
+    \normalfont \normalsize
+    \setparsizes { 0pt } { 0pt } { 0pt plus 1fil }
+    \raggedright
+    \noindent \TypesetTUDLogo { \l_@@_thesis_title_logo_dim } \par
+    \vspace { 2 \baselineskip }
+    \group_begin:
+      \usekomafont{titleinfo}
+      \@@_thesis_title_line:N \@faculty
+      \@@_thesis_title_line:N \@department
+      \@@_thesis_title_line:N \@institute
+      \@@_thesis_title_line:N \@chair
+    \group_end:
+    \vspace { 0pt plus 1fill }
+    \tl_if_empty:NF \@titlehead { { \usekomafont{titlehead} \@titlehead \par } \bigskip }
+    \bool_lazy_or:nnF
+      { \tl_if_empty_p:N \@subject }
+      { \tl_if_eq_p:NN \@subject \@thesis }
+      { { \usekomafont{subject} \@subject \par } \medskip }
+    \tl_if_empty:NF \@thesis { { \usekomafont{thesis} \@thesis \par } \bigskip }
+    { \usekomafont{title} \@title \par }
+    \tl_if_empty:NF \@subtitle { \medskip { \usekomafont{subtitle} \@subtitle \par } }
+    \vspace { 3 \baselineskip }
+    \@@_thesis_title_authors:
+    \vspace { 0pt plus 1fill }
+    \tl_if_empty:NF \@graduation
+      {
+        { \usekomafont{titleinfo} \graduationtext \par }
+        \smallskip
+        {
+          \usekomafont{thesis} \@graduation
+          \tl_if_empty:NF \@graduationabbreviation { \nobreakspace ( \@graduationabbreviation ) }
+          \par
+        }
+        \vspace { 0pt plus 1fill }
+      }
+    \tl_clear:N \l_@@_thesis_title_rows_tl
+    \@@_thesis_title_names:n { referee }
+    \@@_thesis_title_names:n { advisor }
+    \@@_thesis_title_names:n { supervisor }
+    \@@_thesis_title_names:n { professor }
+    \tl_if_empty:NF \@thesis
+      {
+        \tl_if_empty:NF \@date
+          { \@@_thesis_title_row:nn { \datetext } { \usekomafont{date} \@date } }
+        \tl_if_empty:NF \@defensedate
+          { \@@_thesis_title_row:nn { \defensedatetext } { \usekomafont{date} \@defensedate } }
+      }
+    \tl_if_empty:NF \l_@@_thesis_title_rows_tl
+      {
+        { \usekomafont{titleinfo}
+          \begin{tabular} { @{} l @{\hspace{1em}} l @{} }
+            \l_@@_thesis_title_rows_tl
+          \end{tabular} \par }
+      }
+    \tl_if_empty:NT \@thesis
+      { \tl_if_empty:NF \@date { { \usekomafont{date} \@date \par } } }
+    \tl_if_empty:NF \@publishers
+      { \bigskip { \usekomafont{publishers} \@publishers \par } }
+    \@thanks
+    \group_end:
+  }
+%    \end{macrocode}
+%
+% \dmacro{\maketitle} setzt den Schmutztitel, die Titelseite, die Titelrückseite und die Widmung jeweils auf eigene Seiten.
+%    \begin{macrocode}
+\RenewDocumentCommand \maketitle { o }
+  {
+    \group_begin:
+    \cs_set_eq:NN \footnote \thanks
+    \tl_if_empty:NF \@extratitle
+      {
+        \cleardoubleoddemptypage
+        \thispagestyle{empty}
+        \group_begin: \noindent \@extratitle \par \group_end:
+        \cleardoubleoddemptypage
+      }
+    \clearpage
+    \IfValueT {#1} { \setcounter { page } {#1} }
+    \thispagestyle{empty}
+    \@@_thesis_title_page:
+    \bool_lazy_and:nnT
+      { \tl_if_empty_p:N \@uppertitleback }
+      { \tl_if_empty_p:N \@lowertitleback }
+      { \legacy_if:nF { @twoside } { \clearpage } }
+    \bool_lazy_and:nnF
+      { \tl_if_empty_p:N \@uppertitleback }
+      { \tl_if_empty_p:N \@lowertitleback }
+      {
+        \clearpage
+        \thispagestyle{empty}
+        \group_begin:
+          \normalfont \normalsize
+          \noindent \begin{minipage}[t]{\textwidth} \@uppertitleback \end{minipage} \par
+          \vfill
+          \noindent \begin{minipage}[b]{\textwidth} \@lowertitleback \end{minipage} \par
+        \group_end:
+        \clearpage
+      }
+    \tl_if_empty:NF \@dedication
+      {
+        \cleardoubleoddemptypage
+        \thispagestyle{empty}
+        \null \vfill
+        { \centering \usekomafont{dedication} \@dedication \par }
+        \vspace { 0pt plus 3fill }
+        \clearpage
+      }
+    \cleardoubleoddemptypage
+    \group_end:
+    \cs_gset_eq:NN \thanks \use_none:n
+  }
+%</body&peri>
+%    \end{macrocode}
+%
+% \subsection{Zusammenfassung und Erklärungen}
+%
+% Beide Umgebungen werden durch eine gemeinsame Maschinerie gesetzt, welche die Logik von \dpkg{tudscr} nachbildet.
+% Ein \emph{Teil} ist eine einzelne Zusammenfassung (getrennt durch \dmacro{\nextabstract}) oder
+% eine einzelne Erklärung.
+%
+% \subsubsection{Parameter}
+%
+% Die optionalen Argumente der Umgebungen und Befehle sind Schlüssel-Wert-Listen.
+% Enthält das Argument kein Gleichheitszeichen, so wird es als Wert eines Standardschlüssels interpretiert
+% (Sprache bzw.\@ bei einer Zahl die Spaltenanzahl, bei \dmacro{\confirmation} unterstützende Personen
+% und bei \dmacro{\blocking} das Unternehmen).
+%    \begin{macrocode}
+%<*body&peri>
+\tl_new:N \l_@@_thesis_fm_kind_tl
+\tl_new:N \l_@@_thesis_fm_ps_tl
+\tl_new:N \l_@@_thesis_fm_oldps_tl
+\tl_new:N \l_@@_thesis_fm_partopts_tl
+\tl_new:N \l_@@_thesis_fm_bare_tl
+\int_new:N \l_@@_thesis_fm_columns_int
+\bool_new:N \l_@@_thesis_fm_titlepage_bool
+\bool_new:N \g_@@_thesis_fm_first_bool
+\bool_new:N \l_@@_thesis_in_declarations_bool
+\msg_new:nnn { tudcd } { thesis/fm-pagestyle }
+  { The~page~style~'#1'~is~not~defined. }
+\msg_new:nnn { tudcd } { thesis/fm-pagestyle-ignored }
+  {
+    The~parameter~'pagestyle'~is~ignored,~because~'#1'~is~not~set~on~separate~pages.~
+    Use~'#1=chapter'~or~the~KOMA-Script~option~'titlepage'.
+  }
+\msg_new:nnn { tudcd } { thesis/fm-multicol }
+  { The~parameter~'columns'~requires~the~package~'multicol'. }
+\msg_new:nnn { tudcd } { thesis/fm-language }
+  { The~parameter~'language'~requires~a~language~package~like~'babel'. }
+\msg_new:nnn { tudcd } { thesis/fm-tocmultiple }
+  { 'tocmultiple'~cannot~be~used~with~'#1=single'~or~'#1=chapter'. }
+\msg_new:nnn { tudcd } { thesis/fm-usage }
+  { '\iow_char:N\\#1'~can~only~be~used~within~the~environment~'#2'. }
+\keys_define:nn { tudcd / thesis / fm }
+  {
+    language .code:n =
+      {
+        \cs_if_exist:NTF \selectlanguage
+          { \selectlanguage {#1} }
+          { \msg_error:nn { tudcd } { thesis/fm-language } }
+      },
+    columns .int_set:N = \l_@@_thesis_fm_columns_int,
+    pagestyle .code:n =
+      {
+        \bool_if:NTF \l_@@_thesis_fm_titlepage_bool
+          {
+            \cs_if_exist:cTF { ps@#1 }
+              { \tl_set:Nn \l_@@_thesis_fm_ps_tl {#1} }
+              { \msg_error:nnn { tudcd } { thesis/fm-pagestyle } {#1} }
+          }
+          { \msg_warning:nnV { tudcd } { thesis/fm-pagestyle-ignored } \l_@@_thesis_fm_kind_tl }
+      },
+    markboth .code:n =
+      {
+        \str_case:nnF {#1}
+          {
+            { true }
+              {
+                \bool_set_true:c { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _markboth_bool }
+                \tl_if_empty:NT \l_@@_thesis_fm_ps_tl { \tl_set:Nn \l_@@_thesis_fm_ps_tl { headings } }
+              }
+            { false }
+              { \bool_set_false:c { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _markboth_bool } }
+          }
+          {
+            \bool_set_false:c { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _markboth_bool }
+            \tl_if_empty:NT \l_@@_thesis_fm_ps_tl { \tl_set:Nn \l_@@_thesis_fm_ps_tl { headings } }
+            \manualmark
+            \markboth {#1} {#1}
+          }
+      },
+    markboth .default:n = true,
+    option .code:n = { \@@_thesis_fm_set:Vn \l_@@_thesis_fm_kind_tl {#1} },
+    abstract .meta:n = { option = {#1} },
+    declaration .meta:n = { option = {#1} },
+    company .code:n = { \tl_set:Nn \@company {#1} },
+    supporter .code:n = { \tl_set:Nn \@supporter {#1} },
+    place .code:n = { \tl_set:Nn \@place {#1} },
+    closing .code:n = { \tl_set:Nn \@confirmationclosing {#1} },
+    confirmationclosing .meta:n = { closing = {#1} },
+    unknown .code:n = { \@@_thesis_fm_bare:e { \l_keys_key_str } },
+  }
+\cs_generate_variant:Nn \@@_thesis_fm_set:nn { V }
+\cs_new_protected:Npn \@@_thesis_fm_bare:n #1
+  {
+    \tl_if_empty:NTF \l_@@_thesis_fm_bare_tl
+      {
+        \regex_match:nnTF { \A \d+ \Z } {#1}
+          { \int_set:Nn \l_@@_thesis_fm_columns_int {#1} }
+          { \keys_set:nn { tudcd / thesis / fm } { language = {#1} } }
+      }
+      {
+        \use:e
+          {
+            \keys_set:nn { tudcd / thesis / fm }
+              { \l_@@_thesis_fm_bare_tl = { \exp_not:n {#1} } }
+          }
+      }
+  }
+\cs_generate_variant:Nn \@@_thesis_fm_bare:n { e }
+\cs_new_protected:Npn \@@_thesis_fm_params:n #1
+  {
+    \tl_if_in:nnTF {#1} { = }
+      { \keys_set:nn { tudcd / thesis / fm } {#1} }
+      { \tl_if_blank:nF {#1} { \@@_thesis_fm_bare:n {#1} } }
+  }
+%    \end{macrocode}
+%
+% \subsubsection{Überschriften}
+%
+% Die Überschrift eines Teils hängt von der Ebene ab.
+% Anschließend werden gegebenenfalls Kolumnentitel und Einträge ins Inhaltsverzeichnis gesetzt.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_thesis_fm_head:n #1
+  {
+    \int_case:nn { \int_use:c { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _level_int } }
+      {
+        { 0 }
+          {
+            \bool_if:NT \l_@@_thesis_fm_titlepage_bool { \par }
+            \cs_if_exist_use:N \phantomsection
+            \vskip \bigskipamount
+            \vskip -\parskip
+          }
+        { 1 }
+          {
+            \bool_if:NT \l_@@_thesis_fm_titlepage_bool { \par }
+            \cs_if_exist_use:N \phantomsection
+            \vskip \bigskipamount
+            \vskip -\parskip
+            \group_begin:
+              \noindent \centering
+              \normalfont \sectfont \nobreak #1
+              \par
+            \group_end:
+            \nopagebreak
+            \vskip \medskipamount
+            \vskip -\parskip
+            \@afterheading
+          }
+        { 2 }
+          {
+            \section* {#1}
+            \cs_if_eq:NNF \@mkboth \use_none:nn { \markright { \MakeMarkcase {#1} } }
+          }
+        { 3 }
+          {
+            \chapter* {#1}
+            \markboth { \MakeMarkcase {#1} } { \MakeMarkcase {#1} }
+          }
+      }
+    \bool_if:cT { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _markboth_bool }
+      { \markboth { \MakeMarkcase {#1} } { \MakeMarkcase {#1} } }
+    \int_case:nn { \int_use:c { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _toc_int } }
+      {
+        { 1 } { \cs_if_exist_use:N \phantomsection \addchaptertocentry { } {#1} }
+        { 2 } { \cs_if_exist_use:N \phantomsection \addsectiontocentry { } {#1} }
+      }
+  }
+%    \end{macrocode}
+%
+% \subsubsection{Teile}
+%
+% Vor jedem Teil wird der vertikale Abstand bzw.\@ der Seitenumbruch gesetzt.
+% Werden mehrere Teile gemeinsam auf einer Seite gesetzt (\dcode{multiple}), so werden sie
+% bei \dcode{fil} gleichmäßig vertikal verteilt, ansonsten beginnt jeder Teil auf einer neuen Seite.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_thesis_fm_separate:
+  {
+    \legacy_if:nF { @twocolumn }
+      {
+        \bool_if:NT \l_@@_thesis_fm_titlepage_bool
+          {
+            \bool_if:NTF \g_@@_thesis_fm_first_bool
+              {
+                \bool_if:cT { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _fil_bool }
+                  { \null \vfil }
+              }
+              {
+                \bool_if:cTF { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _multi_bool }
+                  {
+                    \bool_if:cT { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _fil_bool }
+                      { \vfil }
+                  }
+                  {
+                    \bool_if:cTF { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _fil_bool }
+                      { \vfil \null \clearpage \null \vfil }
+                      { \clearpage }
+                  }
+              }
+          }
+      }
+    \bool_gset_false:N \g_@@_thesis_fm_first_bool
+  }
+%    \end{macrocode}
+% Ein Teil wird in Zitatform (\denv{quotation}, bzw.\@ \denv{quoting} falls geladen) gesetzt, wenn er
+% weder auf eigener Seite steht noch eine Gliederungsüberschrift besitzt. Bei mehreren Spalten wird die
+% Überschrift über die Spalten gesetzt.
+%    \begin{macrocode}
+\tl_new:N \l_@@_thesis_fm_quoting_tl
+\tl_set:Nn \l_@@_thesis_fm_quoting_tl { quotation }
+\hook_gput_code:nnn { package/quoting/after } { tudcd/thesis }
+  { \tl_set:Nn \l_@@_thesis_fm_quoting_tl { quoting } }
+\cs_new_protected:Npn \@@_thesis_fm_part_start:nn #1#2
+  {
+    \group_begin:
+      \@@_thesis_fm_params:n {#1}
+      \@@_thesis_fm_separate:
+      \bool_lazy_and:nnT
+        { ! \l_@@_thesis_fm_titlepage_bool }
+        { \int_compare_p:nNn { \int_use:c { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _level_int } } < { 2 } }
+        { \legacy_if:nF { @twocolumn } { \exp_args:NV \begin \l_@@_thesis_fm_quoting_tl } }
+      \int_compare:nNnTF \l_@@_thesis_fm_columns_int > { 1 }
+        {
+          \vspace { -\multicolsep }
+          \begin{multicols} { \l_@@_thesis_fm_columns_int } [ \@@_thesis_fm_head:n {#2} ]
+        }
+        { \@@_thesis_fm_head:n {#2} }
+  }
+\cs_new_protected:Npn \@@_thesis_fm_part_end:
+  {
+      \int_compare:nNnTF \l_@@_thesis_fm_columns_int > { 1 }
+        {
+          \end{multicols}
+          \vspace { -\multicolsep }
+        }
+        { \par }
+      \bool_lazy_and:nnT
+        { ! \l_@@_thesis_fm_titlepage_bool }
+        { \int_compare_p:nNn { \int_use:c { l_@@_thesis_ \l_@@_thesis_fm_kind_tl _level_int } } < { 2 } }
+        { \legacy_if:nF { @twocolumn } { \exp_args:NV \end \l_@@_thesis_fm_quoting_tl \par } }
+    \group_end:
+  }
+\cs_new_protected:Npn \@@_thesis_fm_part:nnn #1#2#3
+  {
+    \@@_thesis_fm_part_start:nn {#1} {#2}
+      #3
+    \@@_thesis_fm_part_end:
+  }
+%    \end{macrocode}
+%
+% \subsubsection{Die gemeinsame Umgebung}
+%
+% Die Umgebungen setzen den Inhalt \dcode{\#3} der Art \dcode{\#1} mit den Parametern \dcode{\#2}.
+% Die Ebene \dcode{chapter} erzwingt eigene Seiten, auf welchen jeder Teil einzeln und ohne vertikale Zentrierung steht.
+% Bei \dcode{tocmultiple} wird der Inhalt vorab in einer Box gesetzt, um die Überschriften aller Teile
+% für einen gemeinsamen Eintrag im Inhaltsverzeichnis zu sammeln.
+%    \begin{macrocode}
+\tl_new:N \g_@@_thesis_fm_toc_tl
+\cs_new_protected:Npn \@@_thesis_fm_env:nnn #1#2#3
+  {
+    \group_begin:
+    \tl_set:Nn \l_@@_thesis_fm_kind_tl {#1}
+    \tl_clear:N \l_@@_thesis_fm_ps_tl
+    \int_set:Nn \l_@@_thesis_fm_columns_int { 1 }
+    \legacy_if:nTF { @titlepage }
+      { \bool_set_true:N \l_@@_thesis_fm_titlepage_bool }
+      { \bool_set_false:N \l_@@_thesis_fm_titlepage_bool }
+    \int_compare:nNnT { \int_use:c { l_@@_thesis_#1_level_int } } = { 3 }
+      {
+        \bool_set_true:N \l_@@_thesis_fm_titlepage_bool
+        \bool_set_false:c { l_@@_thesis_#1_multi_bool }
+        \bool_set_false:c { l_@@_thesis_#1_fil_bool }
+      }
+    \@@_thesis_fm_params:n {#2}
+    \bool_lazy_and:nnT
+      { \int_compare_p:nNn \l_@@_thesis_fm_columns_int > { 1 } }
+      { ! \cs_if_exist_p:N \multicols }
+      {
+        \msg_error:nn { tudcd } { thesis/fm-multicol }
+        \int_set:Nn \l_@@_thesis_fm_columns_int { 1 }
+      }
+    \bool_if:NT \l_@@_thesis_fm_titlepage_bool
+      {
+        \clearpage
+        \tl_set:Ne \l_@@_thesis_fm_oldps_tl { \currentpagestyle }
+        \tl_if_empty:NTF \l_@@_thesis_fm_ps_tl
+          { \pagestyle { empty } }
+          { \pagestyle { \l_@@_thesis_fm_ps_tl } }
+      }
+    \int_compare:nNnT { \int_use:c { l_@@_thesis_#1_toc_int } } > { 2 }
+      { \@@_thesis_fm_toc_multiple:nn {#1} {#3} }
+    \bool_gset_true:N \g_@@_thesis_fm_first_bool
+    #3
+    \bool_if:NTF \l_@@_thesis_fm_titlepage_bool
+      {
+        \bool_if:cT { l_@@_thesis_#1_fil_bool } { \vfil \null }
+        \clearpage
+        \exp_args:NV \pagestyle \l_@@_thesis_fm_oldps_tl
+      }
+      {
+        \int_compare:nNnT { \int_use:c { l_@@_thesis_#1_level_int } } = { 2 }
+          { \vskip \bigskipamount \vskip -\parskip }
+      }
+    \group_end:
+  }
+\cs_new_protected:Npn \@@_thesis_fm_toc_multiple:nn #1#2
+  {
+    \bool_if:cTF { l_@@_thesis_#1_multi_bool }
+      {
+        \tl_gclear:N \g_@@_thesis_fm_toc_tl
+        \group_begin:
+          \cs_set_eq:NN \clearpage \scan_stop:
+          \cs_set_eq:NN \addtocentrydefault \use_none:nnn
+          \cs_set_protected:Npn \@@_thesis_fm_head:n ##1
+            {
+              \protected@xdef \g_@@_thesis_fm_toc_tl
+                {
+                  \tl_if_empty:NF \g_@@_thesis_fm_toc_tl { \g_@@_thesis_fm_toc_tl / }
+                  ##1
+                }
+            }
+          \vbox_set:Nn \l_@@_thesis_tmp_box {#2}
+        \group_end:
+        \tl_if_empty:NF \g_@@_thesis_fm_toc_tl
+          {
+            \cs_if_exist_use:N \phantomsection
+            \int_compare:nNnTF { \int_use:c { l_@@_thesis_#1_toc_int } } = { 3 }
+              { \exp_args:NnV \addchaptertocentry { } \g_@@_thesis_fm_toc_tl }
+              { \exp_args:NnV \addsectiontocentry { } \g_@@_thesis_fm_toc_tl }
+          }
+      }
+      {
+        \msg_warning:nnn { tudcd } { thesis/fm-tocmultiple } {#1}
+        \int_sub:cn { l_@@_thesis_#1_toc_int } { 2 }
+      }
+  }
+%    \end{macrocode}
+%
+% \subsubsection{Die Zusammenfassung}
+%
+% \begin{codedescribe}[env,new=0.8.0]{abstract}
+% \begin{codesyntax}
+% \tsmacro{\begin{abstract}}[Parameter]
+% \ldots
+% \tsmacro{\nextabstract}[Parameter]
+% \ldots
+% \tsmacro{\end{abstract}}{}
+% \end{codesyntax}
+% Setzt eine oder mehrere Zusammenfassungen. Mit \dmacro{\nextabstract} wird die nächste Zusammenfassung,
+% üblicherweise in einer anderen Sprache, begonnen. Mögliche Parameter sind
+% \dcode{language}, \dcode{columns}, \dcode{pagestyle}, \dcode{markboth} und \dcode{option}
+% (bzw.\@ \dcode{abstract}), welches die Werte der Klassenoption \doption{abstract} lokal setzt.
+% \end{codedescribe}
+%    \begin{macrocode}
+\NewDocumentCommand \nextabstract { O{} }
+  { \msg_error:nnnn { tudcd } { thesis/fm-usage } { nextabstract } { abstract } }
+\DeclareDocumentEnvironment { abstract } { O{} +b }
+  {
+    \@@_thesis_fm_env:nnn { abstract } {#1}
+      {
+        \RenewDocumentCommand \nextabstract { O{} }
+          {
+            \@@_thesis_fm_part_end:
+            \@@_thesis_fm_part_start:nn {##1} { \abstractname }
+          }
+        \@@_thesis_fm_part:nnn {#1} { \abstractname } {#2}
+      }
+  }
+  { }
+%    \end{macrocode}
+%
+% \subsubsection{Die Erklärungen}
+%
+% \begin{codedescribe}[env,new=0.8.0]{declarations}
+% \begin{codesyntax}
+% \tsmacro{\begin{declarations}}[Parameter]
+% \ldots
+% \tsmacro{\end{declarations}}{}
+% \end{codesyntax}
+% Fasst mehrere Erklärungen zusammen. Neben den Parametern der Zusammenfassung sind
+% \dcode{company}, \dcode{supporter}, \dcode{place} und \dcode{closing} möglich.
+% \end{codedescribe}
+%    \begin{macrocode}
+\DeclareDocumentEnvironment { declarations } { O{} +b }
+  {
+    \@@_thesis_fm_env:nnn { declaration } {#1}
+      {
+        \bool_set_true:N \l_@@_thesis_in_declarations_bool
+        \cs_set:Npn \and { , ~ }
+        \cs_set_eq:NN \thanks \use_none:n
+        #2
+      }
+  }
+  { }
+%    \end{macrocode}
+%
+% Wird ein Befehl für eine Erklärung außerhalb der Umgebung genutzt, so wird diese implizit geöffnet.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_thesis_declaration:nn #1#2
+  {
+    \bool_if:NTF \l_@@_thesis_in_declarations_bool
+      {
+        \tl_set:Nn \l_@@_thesis_fm_partopts_tl {#1}
+        #2
+      }
+      {
+        \tl_clear:N \l_@@_thesis_fm_partopts_tl
+        \begin{declarations} [#1] #2 \end{declarations}
+      }
+  }
+\cs_new_protected:Npn \@@_thesis_declaration_part:nn #1#2
+  { \exp_args:NV \@@_thesis_fm_part:nnn \l_@@_thesis_fm_partopts_tl {#1} {#2} }
+%    \end{macrocode}
+%
+% \begin{codedescribe}[macro,new=0.8.0]{\confirmation,\blocking,\declaration,\nextdeclaration}
+% \begin{codesyntax}
+% \tsmacro{\confirmation}[Parameter]
+%
+% \tsmacro{\blocking}[Parameter]
+%
+% \tsmacro{\declaration}[Parameter]
+%
+% \tsmacro{\nextdeclaration}[Parameter]{Überschrift,Text}
+% \end{codesyntax}
+% \dmacro{\confirmation} setzt die Selbstständigkeitserklärung, \dmacro{\blocking} den Sperrvermerk und
+% \dmacro{\declaration} beide. Bei den gesternten Varianten werden die Betreuenden als unterstützende Personen genannt.
+% \dmacro{\nextdeclaration} setzt eine eigene Erklärung und ist nur innerhalb von \denv{declarations} erlaubt.
+% \end{codedescribe}
+%
+% Der Abschluss der Selbstständigkeitserklärung besteht aus Ort, Datum und je einer Unterschriftenzeile pro Autor.
+%    \begin{macrocode}
+\tl_gset:Nn \@confirmationclosing { \@@_thesis_confirmation_closing: }
+\cs_new_protected:Npn \@@_thesis_confirmation_closing:
+  {
+    \tl_if_empty:NF \@date
+      {
+        \par \medskip \noindent
+        \tl_if_empty:NF \@place { \@place , \nobreakspace }
+        \@date
+      }
+    \par
+    \vspace { 3 \baselineskip }
+    \noindent
+    \seq_if_empty:NTF \g_@@_thesis_author_seq
+      { \@@_thesis_signature:n { \@author } }
+      {
+        \seq_map_indexed_inline:Nn \g_@@_thesis_author_seq
+          {
+            \int_compare:nNnF {##1} = { 1 } { \hfill }
+            \@@_thesis_signature:n {##2}
+          }
+      }
+    \par
+  }
+\cs_new_protected:Npn \@@_thesis_signature:n #1
+  {
+    \parbox[t] { 0.4 \linewidth }
+      { \rule { \linewidth } { 0.4pt } \\ \small #1 }
+  }
+\cs_new_protected:Npn \@@_thesis_declaration_opts:nn #1#2
+  {
+    \tl_set:Nn \l_@@_thesis_tmp_tl {#2}
+    \bool_lazy_and:nnT {#1} { ! \tl_if_empty_p:N \@supervisor }
+      { \tl_put_left:Ne \l_@@_thesis_tmp_tl { supporter = { \exp_not:o \@supervisor } , } }
+  }
+\cs_new_protected:Npn \@@_thesis_confirmation_part:
+  {
+    \@@_thesis_declaration_part:nn { \confirmationname }
+      { \confirmationtext \par \@confirmationclosing }
+  }
+\cs_new_protected:Npn \@@_thesis_blocking_part:
+  { \@@_thesis_declaration_part:nn { \blockingname } { \blockingtext } }
+\NewDocumentCommand \confirmation { s O{} }
+  {
+    \group_begin:
+      \tl_set:Nn \l_@@_thesis_fm_bare_tl { supporter }
+      \@@_thesis_declaration_opts:nn {#1} {#2}
+      \exp_args:NV \@@_thesis_declaration:nn \l_@@_thesis_tmp_tl
+        { \@@_thesis_confirmation_part: }
+    \group_end:
+  }
+\NewDocumentCommand \blocking { O{} }
+  {
+    \group_begin:
+      \tl_set:Nn \l_@@_thesis_fm_bare_tl { company }
+      \@@_thesis_declaration:nn {#1} { \@@_thesis_blocking_part: }
+    \group_end:
+  }
+\NewDocumentCommand \declaration { s O{} }
+  {
+    \group_begin:
+      \@@_thesis_declaration_opts:nn {#1} {#2}
+      \exp_args:NV \@@_thesis_declaration:nn \l_@@_thesis_tmp_tl
+        {
+          \@@_thesis_confirmation_part:
+          \@@_thesis_blocking_part:
+        }
+    \group_end:
+  }
+\NewDocumentCommand \nextdeclaration { O{} m m }
+  {
+    \bool_if:NTF \l_@@_thesis_in_declarations_bool
+      { \@@_thesis_fm_part:nnn {#1} {#2} {#3} }
+      { \msg_error:nnnn { tudcd } { thesis/fm-usage } { nextdeclaration } { declarations } }
+  }
+%</body&peri>
+%    \end{macrocode}

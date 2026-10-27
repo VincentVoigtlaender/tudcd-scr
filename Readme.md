@@ -26,6 +26,7 @@
 Zum Zeitpunkt des Schreibens beinhaltet das Bundle eine
 * `tudcdartcl`, eine Artikelklasse,
 * `tudcdreprt`, eine Reportklasse,
+* `tudcdthesis`, eine Klasse für Abschlussarbeiten (Nachfolger von `tudscrreprt`),
 * `tudcdletter`, eine Briefklasse und
 * sowie ein `beamer` Theme `tudcd`.
 
@@ -108,6 +109,8 @@ Schreiben Sie bitte dazu, wer sie entwickelt hat, und ab wann bis wann sie ungef
 * `%dev-version%`
   * Hinzufügen eines Fixes von `\color_select:V`
   * Beheben der Weitergabe unbekannter Klassenoptionen an KOMA-Script: Optionen der Form `<Schlüssel>=<Wert>` (bspw. `parskip=half`) kommen nun vollständig an.
+  * Hinzufügen der Klasse `tudcdthesis` für Abschlussarbeiten als Nachfolger von `tudscrreprt`.
+  * Beheben der Kompilationstests, welche beim Entpacken abgebrochen sind und daher nicht ausgeführt wurden.
 * `0.7.1`
   * Hinzufügen des DDC Logos auf der Briefklasse.
   * Anpassen der `plain` Option von Beamerfolien auf eine sinnvolle Standardoption.
