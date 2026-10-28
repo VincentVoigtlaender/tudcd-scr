@@ -13,6 +13,8 @@
 \usepackage{csquotes}
 \usepackage{blindtext}
 \usepackage{hyperref}
+\usepackage{listings}
+\lstMakeShortInline|
 
 % Organisationseinheiten
 \faculty{Fakultät Kaffeemaschinenbau}
@@ -44,9 +46,24 @@
   \blindtext
 \end{abstract}
 
+% Zum Setzen einer eigenen Selbstständigkeitserklärung den folgenden Block
+% auskommentieren:
+% \renewcaptionname{ngerman}{\confirmationtext}{
+%   Hier sollten Sie die von Ihrer Professur zur Verfügung gestellte 
+%   Selbstständigkeitserklärung einfügen.
+% }
+
+% Zum Setzen eines eigenen Sperrvermerks den folgenden Block auskommentieren:
+% \renewcaptionname{ngerman}{\blockingtext}{
+%   Hier sollten Sie den von Ihrer Professur zur Verfügung gestellte 
+%   Sperrvermerk einfügen.
+% }
+
 \begin{declarations}
+  % Selbstständigkeitserklärung
   \confirmation
-  \blocking[company=Heimlich GmbH]
+  % Zum Entfernen des Sperrvermerks die folgende Zeile löschen
+  \blocking[company=Heimlich GmbH] 
 \end{declarations}
 
 \tableofcontents
