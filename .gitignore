@@ -50,8 +50,6 @@ temp/
 *.xdy
 *.xlg
 *.todos
-## test results
-*.tlg
 ## include test files
 !test/**/*.tex
 !test/**/*.cls
@@ -69,3 +67,5 @@ source/install/*.sh
 source/install/*.tex
 __*
 mypersonaldata.lua
+## VS Code settings
+.vscode/
