@@ -499,147 +499,6 @@ Marginalie eingeschaltet ist. Um daher Broschüren zu setzen, ist bei eingeschal
   \caption{Resultat der Beispieldatei}
 \end{figure}
 
-\chapter{Abschlussarbeiten im Stil der TU Dresden}
-
-Für Abschlussarbeiten steht die Klasse \texttt{tudcdthesis} bereit.
-Sie ist eine schlanke Erweiterung der \KOMAScript-Klasse \texttt{scrbook}~\cite{komascriptDocs}
-und ersetzt die Klasse \texttt{tudscrreprt} aus dem Bündel \texttt{tudscr}.
-Die Eingabefelder, die Titelseite, die Zusammenfassung und die Erklärungen von \texttt{tudscrreprt} werden
-mit denselben Befehlen bereitgestellt, sodass bestehende Arbeiten in der Regel nur die Klasse wechseln müssen.
-
-Im Unterschied zu den übrigen Klassen dieses Bündels
-\begin{itemize}
-  \item wird der Satzspiegel von \texttt{typearea} berechnet, die Optionen \texttt{BCOR} und \texttt{DIV} sind also erlaubt,
-  \item wird der Fließtext in Computer Modern gesetzt, da diese Schrift für lange Texte gut lesbar ist.
-        Lediglich Überschriften, Titel und Kolumnentitel nutzen die Hausschrift Noto Sans.
-\end{itemize}
-Alle übrigen Optionen werden an \texttt{scrbook} weitergereicht.
-
-\section{Digital oder gedruckt}
-
-Die globale Option \texttt{output} wählt das Ausgabemedium.
-\begin{description}
-  \item[\texttt{output=digital}] (Voreinstellung) setzt die Arbeit einseitig.
-    Überschriften, Titel, Kolumnentitel, Kapiteleinträge im Inhaltsverzeichnis, Verweise und das Logo
-    erscheinen in Brilliantblau.
-  \item[\texttt{output=print}] setzt die Arbeit doppelseitig mit \texttt{open=right},
-    \texttt{cleardoublepage=empty} und einer Bindekorrektur von \texttt{BCOR=10mm}.
-    Alle zuvor farbigen Elemente werden schwarz gesetzt, damit beim Druck keine Seite nur wegen
-    eines kleinen farbigen Elements als Farbseite abgerechnet wird.
-\end{description}
-Explizit angegebene Optionen haben immer Vorrang, beispielsweise ergibt
-\texttt{\textbackslash documentclass[output=print,BCOR=5mm]\{tudcdthesis\}} eine Bindekorrektur von \qty{5}{\mm}.
-Ebenso lässt sich die Hervorhebungsfarbe über \texttt{color/highlight-color} und die Farbe des Logos über
-\texttt{logo/color} anpassen.
-
-Mit der Option \texttt{bodyfont=noto} wird auch der Fließtext in Noto Sans gesetzt.
-
-\section{Angaben zur Arbeit}
-
-Die Angaben werden in der Präambel oder vor \texttt{\textbackslash maketitle} gesetzt.
-\begin{lstlisting}
-\faculty{Fakultät Maschinenwesen}
-\department{...}  \institute{...}  \chair{...}
-\thesis{master}       % oder Freitext
-\graduation[M.Sc.]{Master of Science}
-\title{...}  \subtitle{...}
-\author{Name
-  \matriculationnumber{12345678}
-  \dateofbirth{1.1.2000}\placeofbirth{Dresden}
-  \course{...}\discipline{...}
-  \and Weitere Person ...}
-\matriculationyear{2020}  % gilt für alle Autoren
-\supervisor{Name \and Name}
-\professor{...}  \referee{...}  \advisor{...}
-\date{...}  \defensedate{...}
-\maketitle
-\end{lstlisting}
-Als Art der Arbeit versteht \texttt{\textbackslash thesis} (wie auch \texttt{\textbackslash subject})
-die Schlüsselwörter \texttt{diploma}, \texttt{master}, \texttt{bachelor}, \texttt{diss}, \texttt{habil},
-\texttt{student}, \texttt{evidence}, \texttt{project}, \texttt{seminar}, \texttt{term}, \texttt{research},
-\texttt{log}, \texttt{report} und \texttt{internship}, welche durch die passende Bezeichnung in der Dokumentsprache
-ersetzt werden.
-Die Angaben zu Autoren können innerhalb von \texttt{\textbackslash author} je Person oder außerhalb für alle
-Personen gesetzt werden.
-Mit \texttt{\textbackslash getfield\{<Feld>\}} lässt sich jedes Feld ausgeben.
-
-\section{Zusammenfassung und Erklärungen}
-
-Die Umgebung \texttt{abstract} setzt eine oder mehrere Zusammenfassungen, wobei \texttt{\textbackslash nextabstract}
-die nächste beginnt:
-\begin{lstlisting}
-\begin{abstract}
-  Deutscher Text ...
-  \nextabstract[english]
-  English text ...
-\end{abstract}
-\end{lstlisting}
-Die Selbstständigkeitserklärung und der Sperrvermerk werden mit \texttt{\textbackslash confirmation} und
-\texttt{\textbackslash blocking[company=<Unternehmen>]} gesetzt, beide zusammen mit \texttt{\textbackslash declaration}.
-Mehrere Erklärungen lassen sich in der Umgebung \texttt{declarations} zusammenfassen, in welcher mit
-\texttt{\textbackslash nextdeclaration\{<Überschrift>\}\{<Text>\}} auch eigene Erklärungen möglich sind.
-Die Texte stammen aus \texttt{tudscr} und lassen sich mit
-\texttt{\textbackslash renewcaptionname\{ngerman\}\{\textbackslash confirmationtext\}\{...\}} ersetzen.
-
-Das Aussehen steuern die Optionen \texttt{abstract} und \texttt{declaration}, welche über
-\texttt{\textbackslash TUDCDsetup} (bzw.\ \texttt{\textbackslash TUDoption}) auch in der Präambel gesetzt werden können.
-Die wichtigsten Werte sind
-\begin{description}
-  \item[\texttt{false}, \texttt{true}, \texttt{section}, \texttt{chapter}] keine, eine zentrierte, eine Abschnitts-
-    oder eine Kapitelüberschrift (Voreinstellung: \texttt{true}),
-  \item[\texttt{multiple}, \texttt{single}] alle Teile gemeinsam oder jeden Teil auf einer eigenen Seite,
-  \item[\texttt{fil}, \texttt{nofil}] vertikale Zentrierung auf der Seite,
-  \item[\texttt{totoc}, \texttt{nottotoc}, \texttt{tocmultiple}] Einträge ins Inhaltsverzeichnis.
-\end{description}
-
-\section{Umstieg von \texttt{tudscrreprt}}
-
-Beim Umstieg genügt es meist, \texttt{tudscrreprt} durch \texttt{tudcdthesis} zu ersetzen.
-Die Layoutoptionen von \texttt{tudscr} werden dabei nicht unterstützt und mit einer Warnung ignoriert.
-
-\begin{table}[ht]
-  \centering
-  \small
-  \begin{tabular}{@{}p{0.45\linewidth}p{0.5\linewidth}@{}}
-    \toprule
-    \texttt{tudscrreprt} & \texttt{tudcdthesis} \\
-    \midrule
-    Eingabefelder, \texttt{\textbackslash getfield} & unverändert \\
-    \texttt{\textbackslash maketitle} & Titelseite im neuen Corporate Design, nur optionale Seitenzahl \\
-    \texttt{abstract}, \texttt{declarations}, \texttt{\textbackslash confirmation}, \texttt{\textbackslash blocking} & unverändert \\
-    Optionen \texttt{abstract} und \texttt{declaration} & unverändert \\
-    \texttt{\textbackslash TUDoptions}, \texttt{\textbackslash TUDoption} & unverändert, alternativ \texttt{\textbackslash TUDCDsetup} \\
-    Seitenstile \texttt{tudheadings} & Aliase für die Seitenstile von \texttt{scrlayer-scrpage} \\
-    \texttt{cd}, \texttt{cdfont}, \texttt{cdgeometry}, \texttt{cdhead}, \texttt{ddc}, \ldots & entfallen, siehe \texttt{output} und \texttt{bodyfont} \\
-    \texttt{\textbackslash makecover}, \texttt{\textbackslash headlogo}, \texttt{\textbackslash footlogo} & entfallen \\
-    Paket \texttt{tudscrsupervisor} & entfällt \\
-    \texttt{\textbackslash supporter}, \texttt{\textbackslash titledelimiter} & entfallen, unterstützende Personen über \texttt{\textbackslash confirmation[supporter=...]} \\
-    \texttt{\textbackslash date[...]}, \texttt{\textbackslash date*} & entfallen, \texttt{\textbackslash date} von \KOMAScript \\
-    \bottomrule
-  \end{tabular}
-  \caption{Vergleich von \texttt{tudscrreprt} und \texttt{tudcdthesis}}
-\end{table}
-
-\section{Fertige Beispielarbeit}
-
-Eine beispielhafte Diplomarbeit ist hier angegeben.
-
-\lstinputlisting{demo-thesis.tex}
-\marginpar{Klicken Sie hier um die Datei aus der PDF zu extrahieren.
-\textattachfile{demo-thesis.tex}{\texttt{demo-thesis.tex}}}
-
-\begin{figure}[hb]
-  \centering
-  \setlength\fboxsep{0pt}
-  \subcaptionbox{Titelseite}{
-    \fbox{\includegraphics[page=1,width=\dimexpr(2\tudcdGridColumnwidth+1\tudcdGridColumnsep)]{demo-thesis.pdf}}
-  }
-  \subcaptionbox{Erste Kapitelseite}{
-    \fbox{\includegraphics[page=6,width=\dimexpr(2\tudcdGridColumnwidth+1\tudcdGridColumnsep)]{demo-thesis.pdf}}
-  }
-  \caption{Resultat der Beispieldatei}
-\end{figure}
-
 \chapter{Briefe im Stil der TU Dresden}
 
 Briefe für die Hauspost, sowie interne und externe Kommunikation werden mit der Klasse \lstinline|tudcdlttr|
@@ -716,6 +575,7 @@ Ein fertiges Beispiel für einen Brief wird bereitgestellt.
     tertiary-color=Violett2
   }
 }
+
 \chapter{Präsentationen im Stil der TU Dresden}
 
 Zum Zeitpunkt des Schreibens wird eine \texttt{beamer}~\cite{ctan-beamer} Präsentationsvorlage
@@ -806,7 +666,209 @@ Leerzeichen müssen manuell mit \lstinline[showspaces=true]|\ | eingefügt werde
 }
 \printbibliography%
 
+\chapter{Abschlussarbeiten im Stil der TU Dresden}
 
+Für Abschlussarbeiten steht die Klasse \texttt{tudcdthesis} bereit.
+Sie ist eine schlanke Erweiterung der \KOMAScript-Klasse \texttt{scrbook}~\cite{komascriptDocs}
+und ersetzt die Klasse \texttt{tudscrreprt} aus dem Bündel \texttt{tudscr}.
+Die Eingabefelder, die Titelseite, die Zusammenfassung und die Erklärungen von \texttt{tudscrreprt} werden
+mit denselben Befehlen bereitgestellt, sodass bestehende Arbeiten in der Regel nur die Klasse wechseln müssen.
 
+Im Unterschied zu den übrigen Klassen dieses Bündels
+\begin{itemize}
+  \item wird der Satzspiegel von \texttt{typearea} berechnet, die Optionen \texttt{BCOR} und \texttt{DIV} sind also erlaubt,
+  \item wird der Fließtext in Computer Modern gesetzt, da diese Schrift für lange Texte gut lesbar ist.
+        Lediglich Überschriften, Titel und Kolumnentitel nutzen die Hausschrift Noto Sans.
+\end{itemize}
+Alle übrigen Optionen werden an \texttt{scrbook} weitergereicht.
+
+\section{Digital oder gedruckt}
+
+Die globale Option \texttt{output} wählt das Ausgabemedium.
+\begin{description}
+  \item[\texttt{output=digital}] (Voreinstellung) setzt die Arbeit einseitig.
+    Überschriften, Titel, Kolumnentitel, Kapiteleinträge im Inhaltsverzeichnis, Verweise und das Logo
+    erscheinen in Brilliantblau.
+  \item[\texttt{output=print}] setzt die Arbeit doppelseitig mit \texttt{open=right},
+    \texttt{cleardoublepage=empty} und einer Bindekorrektur von \texttt{BCOR=10mm}.
+    Alle zuvor farbigen Elemente werden schwarz gesetzt, damit beim Druck keine Seite nur wegen
+    eines kleinen farbigen Elements als Farbseite abgerechnet wird.
+\end{description}
+Explizit angegebene Optionen haben immer Vorrang, beispielsweise ergibt
+\texttt{\textbackslash documentclass[output=print,BCOR=5mm]\{tudcdthesis\}} eine Bindekorrektur von \qty{5}{\mm}.
+Ebenso lässt sich die Hervorhebungsfarbe über \texttt{color/highlight-color} und die Farbe des Logos über
+\texttt{logo/color} anpassen.
+
+Mit der Option \texttt{bodyfont=noto} wird auch der Fließtext in Noto Sans gesetzt.
+
+\section{Angaben zur Arbeit}
+
+Die Angaben werden in der Präambel oder vor \texttt{\textbackslash maketitle} gesetzt.
+\begin{lstlisting}
+\faculty{Fakultät Maschinenwesen}
+\department{...}  \institute{...}  \chair{...}
+\thesis{master}       % oder Freitext
+\graduation[M.Sc.]{Master of Science}
+\title{...}  \subtitle{...}
+\author{Name
+  \matriculationnumber{12345678}
+  \dateofbirth{1.1.2000}\placeofbirth{Dresden}
+  \course{...}\discipline{...}
+  \and Weitere Person ...}
+\matriculationyear{2020}  % gilt für alle Autoren
+\supervisor{Name \and Name}
+\professor{...}  \referee{...}  \advisor{...}
+\date{...}  \defensedate{...}
+\maketitle
+\end{lstlisting}
+Als Art der Arbeit versteht \texttt{\textbackslash thesis} (wie auch \texttt{\textbackslash subject})
+die Schlüsselwörter \texttt{diploma}, \texttt{master}, \texttt{bachelor}, \texttt{diss}, \texttt{habil},
+\texttt{student}, \texttt{evidence}, \texttt{project}, \texttt{seminar}, \texttt{term}, \texttt{research},
+\texttt{log}, \texttt{report} und \texttt{internship}, welche durch die passende Bezeichnung in der Dokumentsprache
+ersetzt werden.
+Die Angaben zu Autoren können innerhalb von \texttt{\textbackslash author} je Person oder außerhalb für alle
+Personen gesetzt werden.
+Mit \texttt{\textbackslash getfield\{<Feld>\}} lässt sich jedes Feld ausgeben.
+
+\section{Zusammenfassung und Erklärungen}
+
+Die Umgebung \texttt{abstract} setzt eine oder mehrere Zusammenfassungen, wobei \texttt{\textbackslash nextabstract}
+die nächste beginnt:
+\begin{lstlisting}
+\begin{abstract}
+  Deutscher Text ...
+  \nextabstract[english]
+  English text ...
+\end{abstract}
+\end{lstlisting}
+Die Selbstständigkeitserklärung und der Sperrvermerk werden mit \texttt{\textbackslash confirmation} und
+\texttt{\textbackslash blocking[company=<Unternehmen>]} gesetzt, beide zusammen mit \texttt{\textbackslash declaration}.
+Mehrere Erklärungen lassen sich in der Umgebung \texttt{declarations} zusammenfassen, in welcher mit
+\texttt{\textbackslash nextdeclaration\{<Überschrift>\}\{<Text>\}} auch eigene Erklärungen möglich sind.
+Die Texte stammen aus \texttt{tudscr} und lassen sich mit
+\texttt{\textbackslash renewcaptionname\{ngerman\}\{\textbackslash confirmationtext\}\{...\}} ersetzen.
+
+Das Aussehen steuern die Optionen \texttt{abstract} und \texttt{declaration}, welche als Klassenoption oder über
+\texttt{\textbackslash TUDCDsetup} (bzw.\ \texttt{\textbackslash TUDoption}) auch in der Präambel gesetzt werden können.
+Sie verstehen dieselben Werte wie die Option \texttt{abstract} von \texttt{tudscr}, einschließlich aller Synonyme
+(in Klammern). Mehrere Werte werden mit Komma getrennt, beispielsweise \texttt{abstract=\{section,multiple,totoc\}}.
+
+\subsection{Überschrift}
+\begin{description}
+  \item[\texttt{false} (\texttt{off}, \texttt{no})] keine Überschrift,
+  \item[\texttt{true} (\texttt{on}, \texttt{yes})] zentrierte Überschrift mit \texttt{\textbackslash abstractname}
+    (Voreinstellung),
+  \item[\texttt{section} (\texttt{sec}, \texttt{sect}, \texttt{addsec})] Überschrift mit \texttt{\textbackslash section*},
+  \item[\texttt{chapter} (\texttt{chap}, \texttt{addchap}, \texttt{heading}, \texttt{new}, \texttt{standard})]
+    Überschrift mit \texttt{\textbackslash chapter*}.
+\end{description}
+
+\subsection{Inhaltsverzeichnis}
+Ohne Überschriftsebene (\texttt{false}, \texttt{true}) wird kein Eintrag erzeugt, mit \texttt{section} oder
+\texttt{chapter} ein Eintrag auf der obersten Ebene. Dies lässt sich überschreiben:
+\begin{description}
+  \item[\texttt{nottotoc} (\texttt{notoc})] kein Eintrag,
+  \item[\texttt{totoc} (\texttt{toc}, \texttt{levelup})] unnummerierter Eintrag auf der obersten Gliederungsebene,
+  \item[\texttt{totocleveldown} (\texttt{tocleveldown}, \texttt{leveldown})] Eintrag eine Ebene tiefer,
+  \item[\texttt{tocmultiple} (\texttt{tocmulti}, \texttt{tocall}, \texttt{tocaggregate})] ein einziger Eintrag
+    für alle Zusammenfassungen, dessen Titel aus den einzelnen Überschriften besteht
+    (z.\,B. \glqq Zusammenfassung/Abstract\grqq).
+\end{description}
+Bei \texttt{totoc} erhält \emph{jede} Zusammenfassung einen eigenen Eintrag mit der Überschrift in ihrer Sprache.
+Soll nur die Zusammenfassung in der Dokumentsprache im Inhaltsverzeichnis erscheinen, wird der Eintrag für die
+weiteren Zusammenfassungen lokal abgeschaltet:
+\begin{lstlisting}
+\begin{abstract}
+  Deutscher Text ...
+  \nextabstract[english,option=nottotoc]
+  English text ...
+\end{abstract}
+\end{lstlisting}
+
+% \subsection{Kolumnentitel}
+% \begin{description}
+%   \item[\texttt{markboth} (\texttt{mark})] Kolumnentitel auf allen Seiten mit \texttt{\textbackslash abstractname},
+%   \item[\texttt{nomarkboth} (\texttt{nomark})] Kolumnentitel wie in der aktuellen Gliederungsebene (Voreinstellung).
+% \end{description}
+
+\subsection{Anordnung}
+Die folgenden Werte wirken nur bei einer Titelseite (\texttt{titlepage=true}) und nicht bei \texttt{chapter}:
+\begin{description}
+  \item[\texttt{single} (\texttt{one}, \texttt{simple})] jede Zusammenfassung auf einer eigenen Seite
+    (bzw.\ in einer neuen Spalte),
+  \item[\texttt{multiple} (\texttt{multi}, \texttt{all}, \texttt{aggregate})] alle Zusammenfassungen nacheinander
+    auf derselben Seite, sofern der Platz reicht (Voreinstellung),
+  \item[\texttt{fil} (\texttt{fill}, \texttt{vfil}, \texttt{vfill})] vertikal zentriert (Voreinstellung),
+  \item[\texttt{nofil} (\texttt{nofill}, \texttt{novfil}, \texttt{novfill})] wie im Fließtext.
+\end{description}
+Ohne Titelseite wird die Zusammenfassung in einer \texttt{quotation}-Umgebung gesetzt (bzw.\ \texttt{quoting},
+falls das Paket geladen ist).
+
+\subsection{Parameter der Umgebung}
+Die Umgebung \texttt{abstract} und der Befehl \texttt{\textbackslash nextabstract} akzeptieren als optionales
+Argument eine Schlüssel-Wert-Liste. Ein Argument ohne Gleichheitszeichen wird als Sprache
+bzw.\ bei einer Zahl als Spaltenanzahl gelesen:
+\begin{description}
+  \item[\texttt{language=<Sprache>}] Sprache der Zusammenfassung (Überschrift und Trennmuster); die Sprache muss
+    beim Laden von \texttt{babel} angegeben worden sein,
+  \item[\texttt{columns=<Anzahl>}] mehrspaltiger Satz (erfordert \texttt{multicol}),
+  \item[\texttt{pagestyle=<Seitenstil>}] Seitenstil der Seite (nur bei eigener Seite),
+  \item[\texttt{markboth=<Einstellung>}] \texttt{true}, \texttt{false} oder ein beliebiger Kolumnentitel
+    (\texttt{markboth=\{\}} löscht ihn),
+  \item[\texttt{option=<Werte>}] beliebige Werte der Option \texttt{abstract}, welche lokal gelten.
+\end{description}
+Sollen mehrere Zusammenfassungen gemeinsam gesetzt werden, ist die Umgebung nur einmal zu verwenden und die
+Zusammenfassungen sind mit \texttt{\textbackslash nextabstract} zu trennen. Die Überschrift kann mit
+\texttt{\textbackslash renewcaptionname\{ngerman\}\{\textbackslash abstractname\}\{Kurzfassung\}} geändert werden.
+
+\section{Umstieg von \texttt{tudscrreprt}}
+
+Beim Umstieg genügt es meist, \texttt{tudscrreprt} durch \texttt{tudcdthesis} zu ersetzen.
+Die Layoutoptionen von \texttt{tudscr} werden dabei nicht unterstützt und mit einer Warnung ignoriert.
+Ein Überlick der portierten Optionen findet sich in Tabelle~\ref{tab:migration_from_tudscrreprt}.
+
+\begin{table}[ht]
+  \centering
+  \small
+  \begin{tabular}{@{}p{0.45\linewidth}p{0.5\linewidth}@{}}
+    \toprule
+    \texttt{tudscrreprt} & \texttt{tudcdthesis} \\
+    \midrule
+    Eingabefelder, \texttt{\textbackslash getfield} & unverändert \\
+    \texttt{\textbackslash maketitle} & Titelseite im neuen Corporate Design, nur optionale Seitenzahl \\
+    \texttt{abstract}, \texttt{declarations}, \texttt{\textbackslash confirmation}, \texttt{\textbackslash blocking} & unverändert \\
+    Optionen \texttt{abstract} und \texttt{declaration} & unverändert \\
+    \texttt{\textbackslash TUDoptions}, \texttt{\textbackslash TUDoption} & unverändert, alternativ \texttt{\textbackslash TUDCDsetup} \\
+    Seitenstile \texttt{tudheadings} & Aliase für die Seitenstile von \texttt{scrlayer-scrpage} \\
+    \texttt{cd}, \texttt{cdfont}, \texttt{cdgeometry}, \texttt{cdhead}, \texttt{ddc}, \ldots & entfallen, siehe \texttt{output} und \texttt{bodyfont} \\
+    \texttt{\textbackslash makecover}, \texttt{\textbackslash headlogo}, \texttt{\textbackslash footlogo} & entfallen \\
+    Paket \texttt{tudscrsupervisor} & entfällt \\
+    \texttt{\textbackslash supporter}, \texttt{\textbackslash titledelimiter} & entfallen, unterstützende Personen über \texttt{\textbackslash confirmation[supporter=...]} \\
+    \texttt{\textbackslash date[...]}, \texttt{\textbackslash date*} & entfallen, \texttt{\textbackslash date} von \KOMAScript \\
+    \bottomrule
+  \end{tabular}
+  \caption{Vergleich von \texttt{tudscrreprt} und \texttt{tudcdthesis}}
+  \label{tab:migration_from_tudscrreprt}
+\end{table}
+
+\section{Fertige Beispielarbeit}
+
+Eine beispielhafte Diplomarbeit ist hier angegeben.
+
+\lstinputlisting{demo-thesis.tex}
+\marginpar{Klicken Sie hier um die Datei aus der PDF zu extrahieren.
+\textattachfile{demo-thesis.tex}{\texttt{demo-thesis.tex}}}
+
+\begin{figure}[hb]
+  \centering
+  \setlength\fboxsep{0pt}
+  \subcaptionbox{Titelseite}{
+    \fbox{\includegraphics[page=1,width=\dimexpr(2\tudcdGridColumnwidth+1\tudcdGridColumnsep)]{demo-thesis.pdf}}
+  }
+  \subcaptionbox{Erste Kapitelseite}{
+    \fbox{\includegraphics[page=6,width=\dimexpr(2\tudcdGridColumnwidth+1\tudcdGridColumnsep)]{demo-thesis.pdf}}
+  }
+  \caption{Resultat der Beispieldatei}
+\end{figure}
 
 \end{document}
