@@ -1028,6 +1028,7 @@
 \cs_new_protected:Npn \@@_thesis_title_author:nn #1#2
   {
     { \usekomafont{author} #2 \par }
+    \smallskip 
     \group_begin:
       \usekomafont{titleinfo}
       \@@_thesis_author_get:nnN {#1} { emailaddress } \l_@@_thesis_title_a_tl
