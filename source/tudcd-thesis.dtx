@@ -408,6 +408,20 @@
 %</body&peri>
 %    \end{macrocode}
 %
+% Im Vorspann (\cs{frontmatter}) werden die Seiten mit großen römischen Ziffern nummeriert.
+%    \begin{macrocode}
+%<*body&peri>
+\hook_gput_code:nnn { begindocument/before } { tudcd/thesis/romannumbers }
+  {
+    \cs_if_exist:NT \frontmatter
+      {
+        \hook_gput_code:nnn { cmd/frontmatter/after } { tudcd/thesis/romannumbers }
+          { \pagenumbering { Roman } }
+      }
+  }
+%</body&peri>
+%    \end{macrocode}
+%
 % \subsection{Gestaltungselemente}
 %
 % Alle Gliederungsüberschriften und, da \dcode{scrbook} diese von \dcode{disposition} ableitet,
