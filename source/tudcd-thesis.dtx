@@ -1021,6 +1021,43 @@
   { \tl_if_empty:NF #2 { #1 : ~ #2 \par } }
 %    \end{macrocode}
 %
+% \begin{codedescribe}[macro,new=0.8.1]{\secondlogo}
+% \begin{codesyntax}
+% \tsmacro{\secondlogo}{Logo}
+% \end{codesyntax}
+% Setzt ein Zweitlogo (z.\,B. einer Kooperationspartnerin), welches auf der Titelseite rechtsbündig
+% in der Höhe des TUD-Logos gesetzt wird. Entsprechend der Vorgabe des Corporate Designs wird das Zweitlogo
+% automatisch so verkleinert, dass seine Fläche (Breite mal Höhe) höchstens $2/3$ der Fläche des TUD-Logos beträgt.
+% Kleinere Logos werden nicht vergrößert. Das Argument kann beliebiger Inhalt sein, typischerweise \dmacro{\includegraphics}.
+% \end{codedescribe}
+%    \begin{macrocode}
+\@@_thesis_new_field:nn { secondlogo } { }
+\NewDocumentCommand \secondlogo { m }
+  { \tl_gset:Nn \@secondlogo {#1} }
+\box_new:N \l_@@_thesis_main_logo_box
+\box_new:N \l_@@_thesis_second_logo_box
+\cs_new_protected:Npn \@@_thesis_second_logo_set:n #1
+  {
+    \hbox_set:Nn \l_@@_thesis_second_logo_box { \noindent #1 }
+    \fp_set:Nn \l_tmpa_fp
+      {
+        \dim_to_fp:n { \box_wd:N \l_@@_thesis_main_logo_box }
+        * \dim_to_fp:n { \box_ht:N \l_@@_thesis_main_logo_box + \box_dp:N \l_@@_thesis_main_logo_box }
+      }
+    \fp_set:Nn \l_tmpb_fp
+      {
+        \dim_to_fp:n { \box_wd:N \l_@@_thesis_second_logo_box }
+        * \dim_to_fp:n { \box_ht:N \l_@@_thesis_second_logo_box + \box_dp:N \l_@@_thesis_second_logo_box }
+      }
+    \fp_compare:nNnF { \l_tmpb_fp } > { 0 }
+      { \msg_error:nn { tudcd } { thesis/second-logo-empty } }
+    \fp_set:Nn \l_tmpa_fp { min ( 1 , sqrt ( 2 / 3 * \l_tmpa_fp / \l_tmpb_fp ) ) }
+    \box_scale:Nnn \l_@@_thesis_second_logo_box { \l_tmpa_fp } { \l_tmpa_fp }
+  }
+\msg_new:nnn { tudcd } { thesis/second-logo-empty }
+  { The~content~of~\string\secondlogo\ has~zero~area. }
+%    \end{macrocode}
+%
 % Der Block eines Autors besteht aus dem Namen und den zugehörigen Angaben.
 %    \begin{macrocode}
 \tl_new:N \l_@@_thesis_title_a_tl
@@ -1126,7 +1163,23 @@
     \normalfont \normalsize
     \setparsizes { 0pt } { 0pt } { 0pt plus 1fil }
     \raggedright
-    \noindent \TypesetTUDLogo { \l_@@_thesis_title_logo_dim } \par
+    \hbox_set:Nn \l_@@_thesis_main_logo_box { \TypesetTUDLogo { \l_@@_thesis_title_logo_dim } }
+    \tl_if_empty:NTF \@secondlogo
+      { \noindent \box_use:N \l_@@_thesis_main_logo_box \par }
+      {
+        \@@_thesis_second_logo_set:n { \@secondlogo }
+        % Oberkanten beider Logos bündig, Zweitlogo rechtsbündig.
+        \noindent
+        \hbox_to_wd:nn { \linewidth }
+          {
+            \box_use:N \l_@@_thesis_main_logo_box
+            \hfil
+            \box_move_up:nn
+              { \box_ht:N \l_@@_thesis_main_logo_box - \box_ht:N \l_@@_thesis_second_logo_box }
+              { \box_use:N \l_@@_thesis_second_logo_box }
+          }
+        \par
+      }
     \vspace { 2 \baselineskip }
     \group_begin:
       \usekomafont{titleinfo}

@@ -707,6 +707,7 @@ Die Angaben werden in der Präambel oder vor \texttt{\textbackslash maketitle} g
 \begin{lstlisting}
 \faculty{Fakultät Maschinenwesen}
 \department{...}  \institute{...}  \chair{...}
+\secondlogo{\includegraphics{...}}  % optional
 \thesis{master}       % oder Freitext
 \graduation[M.Sc.]{Master of Science}
 \title{...}  \subtitle{...}
@@ -721,6 +722,12 @@ Die Angaben werden in der Präambel oder vor \texttt{\textbackslash maketitle} g
 \date{...}  \defensedate{...}
 \maketitle
 \end{lstlisting}
+Mit \lstinline|\secondlogo| kann ein Zweitlogo (z.\,B. einer Kooperationspartnerin) auf der Titelseite
+rechtsbündig neben dem TUD Logo gesetzt werden. Dabei ist die Vorgabe des Corporate Designs umgesetzt:
+Das Zweitlogo wird automatisch so verkleinert, dass seine Fläche höchstens $2/3$ der Fläche des TUD Logos beträgt.
+Kleinere Logos werden nicht vergrößert.
+Die Oberkanten beider Logos schließen bündig ab.
+
 Als Art der Arbeit versteht \texttt{\textbackslash thesis} (wie auch \texttt{\textbackslash subject})
 die Schlüsselwörter \texttt{diploma}, \texttt{master}, \texttt{bachelor}, \texttt{diss}, \texttt{habil},
 \texttt{student}, \texttt{evidence}, \texttt{project}, \texttt{seminar}, \texttt{term}, \texttt{research},
